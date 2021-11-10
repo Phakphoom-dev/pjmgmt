@@ -6,7 +6,7 @@
     <v-card class="mt-3">
       <v-card-title> เพิ่มผู้ใช้งาน</v-card-title>
       <v-card-text>
-        <validation-observer ref="observer" v-slot="{ invalid }">
+        <validation-observer ref="observer">
           <v-form @submit.prevent="submit">
             <v-container>
               <v-row no-gutters>
@@ -119,7 +119,7 @@
                   <validation-provider
                     v-slot="{ errors }"
                     name="Email"
-                    rules="email"
+                    rules="required|email"
                   >
                     <v-text-field
                       type="email"
@@ -157,13 +157,7 @@
               </v-row>
 
               <v-col cols="12">
-                <v-btn
-                  class="mr-4"
-                  type="submit"
-                  :disabled="invalid"
-                  block
-                  color="primary"
-                >
+                <v-btn class="mr-4" type="submit" block color="primary">
                   ยืนยัน
                 </v-btn>
               </v-col>

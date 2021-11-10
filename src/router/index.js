@@ -4,6 +4,8 @@ import VueRouter from "vue-router";
 import Layout from "@/components/Layout/Layout";
 import Users from "@/views/Users/Users.vue";
 import Teachers from "@/views/Teachers/Teachers.vue";
+import Courses from "@/views/Courses/Courses.vue";
+import Subjects from "@/views/Subjects/Subjects.vue";
 
 // Pages
 import Home from "@/views/Home.vue";
@@ -13,10 +15,13 @@ import Login from "@/views/Login/Login.vue";
 import Dashboard from "@/views/Dashboard/Dashboard.vue";
 import ShowUsers from "@/views/Users/ShowUsers.vue";
 import AddUser from "@/views/Users/AddUser.vue";
-import ShowTeachers from "@/views/Teachers/ShowTeachers.vue";
+import ShowCourses from "@/views/Courses/ShowCourses.vue";
 import AddTeacher from "@/views/Teachers/AddTeacher.vue";
-import Courses from "@/views/Courses/Courses.vue";
-import Subjects from "@/views/Courses/Subjects.vue";
+import AddCourse from "@/views/Courses/AddCourse.vue";
+import ShowTeachers from "@/views/Teachers/ShowTeachers.vue";
+import ShowSubjects from "@/views/Subjects/ShowSubjects.vue";
+import AddSubject from "@/views/Subjects/AddSubject.vue";
+
 import Lessons from "@/views/Courses/Lessons.vue";
 
 Vue.use(VueRouter);
@@ -78,11 +83,37 @@ const routes = [
         path: "courses",
         name: "Courses",
         component: Courses,
+        redirect: "courses/showcourses",
+        children: [
+          {
+            path: "showcourses",
+            name: "ShowCourses",
+            component: ShowCourses,
+          },
+          {
+            path: "addcourse",
+            name: "AddCourse",
+            component: AddCourse,
+          },
+        ],
       },
       {
         path: "subjects",
         name: "Subjects",
         component: Subjects,
+        redirect: "subjects/showsubjects",
+        children: [
+          {
+            path: "showsubjects",
+            name: "ShowSubjects",
+            component: ShowSubjects,
+          },
+          {
+            path: "addsubject",
+            name: "AddSubject",
+            component: AddSubject,
+          },
+        ],
       },
       {
         path: "lessons",
