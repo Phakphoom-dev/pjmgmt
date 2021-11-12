@@ -32,7 +32,7 @@
               </v-row>
 
               <v-row class="mt-0">
-                <v-col lg="6">
+                <v-col cols="12" lg="6" xs="12">
                   <validation-provider
                     v-slot="{ errors }"
                     name="Password"
@@ -53,7 +53,7 @@
                   </validation-provider>
                 </v-col>
 
-                <v-col lg="6">
+                <v-col cols="12" lg="6" xs="12">
                   <validation-provider
                     v-slot="{ errors }"
                     name="Confirm Password"
@@ -75,7 +75,7 @@
               </v-row>
 
               <v-row class="mt-0">
-                <v-col lg="4">
+                <v-col cols="12" lg="4" xs="12">
                   <validation-provider
                     v-slot="{ errors }"
                     name="ชื่อ"
@@ -95,7 +95,7 @@
                   </validation-provider>
                 </v-col>
 
-                <v-col lg="4">
+                <v-col cols="12" lg="4" xs="12">
                   <validation-provider
                     v-slot="{ errors }"
                     name="นามสกุล"
@@ -115,7 +115,7 @@
                   </validation-provider>
                 </v-col>
 
-                <v-col lg="4">
+                <v-col cols="12" lg="4" xs="12">
                   <validation-provider
                     v-slot="{ errors }"
                     name="Email"
@@ -137,7 +137,7 @@
               </v-row>
 
               <v-row no-gutters>
-                <v-col cols="12">
+                <v-col cols="12" lg="4" xs="12">
                   <validation-provider
                     v-slot="{ errors }"
                     name="Role"

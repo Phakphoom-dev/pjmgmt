@@ -190,10 +190,8 @@ export default {
       ];
     },
 
-    editItem(item) {
-      this.editedIndex = this.courses.indexOf(item);
-      this.editedItem = Object.assign({}, item);
-      this.dialog = true;
+    editItem() {
+      this.$router.push("addcourse");
     },
 
     deleteItem(item) {

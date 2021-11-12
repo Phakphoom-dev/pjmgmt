@@ -171,10 +171,8 @@ export default {
       ];
     },
 
-    editItem(item) {
-      this.editedIndex = this.teachers.indexOf(item);
-      this.editedItem = Object.assign({}, item);
-      this.dialog = true;
+    editItem() {
+      this.$router.push("addteacher");
     },
 
     deleteItem(item) {

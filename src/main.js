@@ -6,7 +6,10 @@ import vuetify from "./plugins/vuetify";
 import "roboto-fontface/css/roboto/roboto-fontface.css";
 import "@mdi/font/css/materialdesignicons.css";
 import Axios from "axios";
+import VueSweetalert2 from "vue-sweetalert2";
+import "sweetalert2/dist/sweetalert2.min.css";
 
+Vue.use(VueSweetalert2);
 Vue.prototype.$http = Axios;
 Vue.config.productionTip = false;
 
