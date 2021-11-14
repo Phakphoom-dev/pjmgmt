@@ -91,6 +91,16 @@ export default {
           icon: "mdi-head-question",
           link: "/exams",
         },
+        {
+          title: "ข่าวสาร",
+          icon: "mdi-email-newsletter",
+          link: "/news",
+        },
+        {
+          title: "รายงาน",
+          icon: "mdi-chart-bar",
+          link: "/reports",
+        },
       ],
     };
   },

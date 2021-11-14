@@ -9,11 +9,17 @@ import Axios from "axios";
 import VueSweetalert2 from "vue-sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css";
 import CKEditor from "ckeditor4-vue";
+import VueMoment from "vue-moment";
+import moment from "moment-timezone";
+moment.tz.setDefault("Asia/Jakarta");
 
 Vue.use(CKEditor);
 Vue.use(VueSweetalert2);
 Vue.prototype.$http = Axios;
 Vue.config.productionTip = false;
+Vue.use(VueMoment, {
+  moment,
+});
 
 router.beforeEach((to, from, next) => {
   console.log(to, from);

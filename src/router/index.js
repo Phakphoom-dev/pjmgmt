@@ -9,6 +9,8 @@ import Subjects from "@/views/Subjects/Subjects.vue";
 import Lessons from "@/views/Lessons/Lessons.vue";
 import Quizs from "@/views/Quizs/Quizs.vue";
 import Exams from "@/views/Exams/Exams.vue";
+import News from "@/views/News/News.vue";
+import Reports from "@/views/Reports/Reports.vue";
 
 // Pages
 import Home from "@/views/Home.vue";
@@ -32,6 +34,11 @@ import QuizList from "@/views/Quizs/QuizList.vue";
 import QuizAdd from "@/views/Quizs/QuizAdd.vue";
 import ShowExams from "@/views/Exams/ShowExams.vue";
 import ExamQuizs from "@/views/Exams/ExamQuizs.vue";
+import ShowNews from "@/views/News/ShowNews.vue";
+import ShowReports from "@/views/Reports/ShowReports.vue";
+import VisitReport from "@/views/Reports/VisitReport.vue";
+import QuizReport from "@/views/Reports/QuizReport.vue";
+import ExamReport from "@/views/Reports/ExamReport.vue";
 
 Vue.use(VueRouter);
 
@@ -172,7 +179,7 @@ const routes = [
       },
       {
         path: "exams",
-        name: "exams",
+        name: "Exams",
         component: Exams,
         redirect: "exams/showexams",
         children: [
@@ -185,6 +192,47 @@ const routes = [
             path: "exam-quizs",
             name: "ExamQuizs",
             component: ExamQuizs,
+          },
+        ],
+      },
+      {
+        path: "news",
+        name: "News",
+        component: News,
+        redirect: "news/shownews",
+        children: [
+          {
+            path: "shownews",
+            name: "ShowNews",
+            component: ShowNews,
+          },
+        ],
+      },
+      {
+        path: "reports",
+        name: "Reports",
+        component: Reports,
+        redirect: "reports/showreports",
+        children: [
+          {
+            path: "showreports",
+            name: "ShowReports",
+            component: ShowReports,
+          },
+          {
+            path: "visitreport",
+            name: "VisitReport",
+            component: VisitReport,
+          },
+          {
+            path: "quizreport",
+            name: "QuizReport",
+            component: QuizReport,
+          },
+          {
+            path: "examreport",
+            name: "ExamReport",
+            component: ExamReport,
           },
         ],
       },
