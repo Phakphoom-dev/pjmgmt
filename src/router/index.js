@@ -13,7 +13,6 @@ import News from "@/views/News/News.vue";
 import Reports from "@/views/Reports/Reports.vue";
 
 // Pages
-import Home from "@/views/Home.vue";
 import About from "@/views/About.vue";
 import Error from "@/views/Error/Error.vue";
 import Login from "@/views/Login/Login.vue";
@@ -51,11 +50,10 @@ const routes = [
   {
     path: "/",
     name: "Layout",
-    redirect: "login",
     component: Layout,
     children: [
       {
-        path: "dashboard",
+        path: "",
         name: "Dashboard",
         component: Dashboard,
       },
@@ -230,26 +228,26 @@ const routes = [
             component: QuizReport,
           },
           {
-            path: "examreport",
+            path: "Examreport",
             name: "ExamReport",
             component: ExamReport,
           },
         ],
       },
-      {
-        path: "home",
-        name: "Home",
-        component: Home,
-      },
+
       {
         path: "about",
         name: "About",
         component: About,
       },
       {
-        path: "*",
-        name: "Error",
+        path: "404",
+        name: "404",
         component: Error,
+      },
+      {
+        path: "*",
+        redirect: "/404",
       },
     ],
   },

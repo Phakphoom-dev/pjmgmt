@@ -108,7 +108,7 @@
 
 <script>
 export default {
-  fullname: "ShowTeachers",
+  name: "ShowTeachers",
   data: () => ({
     dialog: false,
     dialogDelete: false,

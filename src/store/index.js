@@ -3,10 +3,10 @@ import Vuex from "vuex";
 
 Vue.use(Vuex);
 
-import sidebar from "@/store/modules/sidebar";
+import toggleSidebar from "@/store/modules/toggleSidebar";
 
 export default new Vuex.Store({
   modules: {
-    sidebar,
+    toggleSidebar,
   },
 });

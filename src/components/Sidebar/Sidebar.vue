@@ -44,6 +44,7 @@
 import { mapActions, mapState } from "vuex";
 
 export default {
+  name: "Sidebar",
   data() {
     return {
       model: 0,
@@ -105,7 +106,7 @@ export default {
     };
   },
   computed: {
-    ...mapState("sidebar", ["drawer"]),
+    ...mapState("toggleSidebar", ["drawer"]),
     DRAWER_STATE: {
       get() {
         return this.drawer;
@@ -117,7 +118,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions("sidebar", ["toggleDrawer"]),
+    ...mapActions("toggleSidebar", ["toggleDrawer"]),
   },
 };
 </script>
