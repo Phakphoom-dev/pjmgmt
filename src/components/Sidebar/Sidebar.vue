@@ -106,7 +106,7 @@ export default {
     };
   },
   computed: {
-    ...mapState("toggleSidebar", ["drawer"]),
+    ...mapState("sidebar", ["drawer"]),
     DRAWER_STATE: {
       get() {
         return this.drawer;
@@ -118,7 +118,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions("toggleSidebar", ["toggleDrawer"]),
+    ...mapActions("sidebar", ["toggleDrawer"]),
   },
 };
 </script>
