@@ -62,7 +62,7 @@ export default {
           link: "/teachers",
         },
         {
-          title: "จัดการหลักสูตร",
+          title: "หลักสูตร",
           icon: "mdi-book-open",
           link: "/courses",
           children: [
@@ -77,9 +77,19 @@ export default {
           link: "/subjects",
         },
         {
-          title: "จัดการบทเรียน",
+          title: "บทเรียน",
           icon: "mdi-book-open",
           link: "/lessons",
+        },
+        {
+          title: "แบบฝึกหัด",
+          icon: "mdi-head-question",
+          link: "/quizs",
+        },
+        {
+          title: "แบบทดสอบ",
+          icon: "mdi-head-question",
+          link: "/exams",
         },
       ],
     };

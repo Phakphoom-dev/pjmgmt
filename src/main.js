@@ -8,7 +8,9 @@ import "@mdi/font/css/materialdesignicons.css";
 import Axios from "axios";
 import VueSweetalert2 from "vue-sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css";
+import CKEditor from "ckeditor4-vue";
 
+Vue.use(CKEditor);
 Vue.use(VueSweetalert2);
 Vue.prototype.$http = Axios;
 Vue.config.productionTip = false;

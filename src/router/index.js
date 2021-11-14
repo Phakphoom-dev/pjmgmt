@@ -6,6 +6,9 @@ import Users from "@/views/Users/Users.vue";
 import Teachers from "@/views/Teachers/Teachers.vue";
 import Courses from "@/views/Courses/Courses.vue";
 import Subjects from "@/views/Subjects/Subjects.vue";
+import Lessons from "@/views/Lessons/Lessons.vue";
+import Quizs from "@/views/Quizs/Quizs.vue";
+import Exams from "@/views/Exams/Exams.vue";
 
 // Pages
 import Home from "@/views/Home.vue";
@@ -21,8 +24,14 @@ import AddCourse from "@/views/Courses/AddCourse.vue";
 import ShowTeachers from "@/views/Teachers/ShowTeachers.vue";
 import ShowSubjects from "@/views/Subjects/ShowSubjects.vue";
 import AddSubject from "@/views/Subjects/AddSubject.vue";
-
-import Lessons from "@/views/Courses/Lessons.vue";
+import ShowLessons from "@/views/Lessons/ShowLessons.vue";
+import AddLesson from "@/views/Lessons/AddLesson.vue";
+import ShowQuizs from "@/views/Quizs/ShowQuizs.vue";
+import QuizLesson from "@/views/Quizs/QuizLesson.vue";
+import QuizList from "@/views/Quizs/QuizList.vue";
+import QuizAdd from "@/views/Quizs/QuizAdd.vue";
+import ShowExams from "@/views/Exams/ShowExams.vue";
+import ExamQuizs from "@/views/Exams/ExamQuizs.vue";
 
 Vue.use(VueRouter);
 
@@ -119,6 +128,65 @@ const routes = [
         path: "lessons",
         name: "Lessons",
         component: Lessons,
+        redirect: "lessons/showlessons",
+        children: [
+          {
+            path: "showlessons",
+            name: "ShowLessons",
+            component: ShowLessons,
+          },
+          {
+            path: "addlesson",
+            name: "AddLesson",
+            component: AddLesson,
+          },
+        ],
+      },
+      {
+        path: "quizs",
+        name: "Quizs",
+        component: Quizs,
+        redirect: "quizs/showquizs",
+        children: [
+          {
+            path: "showquizs",
+            name: "ShowQuizs",
+            component: ShowQuizs,
+          },
+          {
+            path: "quiz-lesson",
+            name: "QuizLesson",
+            component: QuizLesson,
+          },
+          {
+            path: "quiz-list",
+            name: "QuizList",
+            component: QuizList,
+          },
+          {
+            path: "quiz-add",
+            name: "QuizAdd",
+            component: QuizAdd,
+          },
+        ],
+      },
+      {
+        path: "exams",
+        name: "exams",
+        component: Exams,
+        redirect: "exams/showexams",
+        children: [
+          {
+            path: "showexams",
+            name: "ShowExams",
+            component: ShowExams,
+          },
+          {
+            path: "exam-quizs",
+            name: "ExamQuizs",
+            component: ExamQuizs,
+          },
+        ],
       },
       {
         path: "home",
