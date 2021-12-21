@@ -11,7 +11,7 @@
       </template>
     </v-btn>
 
-    <v-toolbar-title>E-Learning</v-toolbar-title>
+    <v-toolbar-title>Sakura Course</v-toolbar-title>
     <v-spacer></v-spacer>
 
     <!-- <v-menu offset-y bottom nudge-bottom="10" left>

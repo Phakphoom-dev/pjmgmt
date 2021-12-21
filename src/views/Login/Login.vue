@@ -31,10 +31,10 @@
                           <v-form>
                             <v-col>
                               <v-text-field
-                                v-model="email"
-                                :rules="emailRules"
+                                v-model="username"
+                                :rules="usernameRules"
                                 value="admin@flatlogic.com"
-                                label="Email Address"
+                                label="Username"
                                 required
                               ></v-text-field>
                               <v-text-field
@@ -51,14 +51,20 @@
                                 class="text-capitalize"
                                 large
                                 :disabled="
-                                  password.length === 0 || email.length === 0
+                                  password.length === 0 || username.length === 0
                                 "
                                 color="primary"
                                 @click="login"
                                 block
                               >
-                                Login</v-btn
-                              >
+                                <v-progress-circular
+                                  v-if="isLoading"
+                                  indeterminate
+                                  color="white"
+                                  :width="5"
+                                ></v-progress-circular>
+                                <span v-else>Login</span>
+                              </v-btn>
                               <!-- <v-btn
                                 large
                                 text
@@ -96,38 +102,38 @@ export default {
   name: "Login",
   data() {
     return {
-      email: "test@gmail.com",
-      emailRules: [
-        (v) => !!v || "E-mail is required",
-        (v) => /.+@.+/.test(v) || "E-mail must be valid",
-      ],
-      password: "123456",
-      passRules: [
-        (v) => !!v || "Password is required",
-        (v) => v.length >= 6 || "Min 6 characters",
-      ],
+      isLoading: false,
+      username: "superadmin",
+      usernameRules: [(v) => !!v || "Username is required"],
+      password: "super5678",
+      passRules: [(v) => !!v || "Password is required"],
     };
   },
   methods: {
     login() {
-      // let formData = new FormData();
-      // formData.append("email", this.email);
-      // formData.append("password", this.password);
-      // this.$http
-      //   .post(`${process.env.VUE_APP_API_PATH}/login`, formData)
-      //   .then((res) => {
-      //     localStorage.setItem("user", JSON.stringify(res.data.user));
-      //     this.$router.push("/dashboard");
-      //   })
-      //   .catch((err) => {
-      //     console.log(err);
-      //   });
+      this.isLoading = true;
+      let formData = new FormData();
+      formData.append("username", this.username);
+      formData.append("password", this.password);
+      this.$http
+        .post(`${process.env.VUE_APP_API_PATH}/authen/adminLogin.php`, formData)
+        .then((res) => {
+          this.isLoading = false;
+          localStorage.setItem("userData", JSON.stringify(res.data[0]));
+          localStorage.setItem("isLogin", true);
+          this.$router.push("/");
+        })
+        .catch((err) => {
+          this.isLoading = false;
+          localStorage.setItem("isLogin", false);
+          this.$swal({
+            icon: "error",
+            text: err.response.data.message,
+            confirmButtonText: "ตกลง",
+            allowOutSideClick: false,
+          });
+        });
     },
-  },
-  created() {
-    // if (window.localStorage.getItem("user") !== "") {
-    //   this.$router.push("/dashboard");
-    // }
   },
 };
 </script>

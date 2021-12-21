@@ -27,88 +27,31 @@
               <v-toolbar-title>จัดการหลักสูตร</v-toolbar-title>
               <v-divider class="mx-4" inset vertical></v-divider>
               <v-spacer></v-spacer>
-              <v-dialog v-model="dialog" max-width="500px">
-                <template v-slot:activator="{}">
-                  <v-btn color="primary" dark class="mb-2" to="addcourse">
-                    เพิ่มหลักสูตร
-                  </v-btn>
-                </template>
-                <v-card>
-                  <v-card-title>
-                    <span class="text-h5">{{ formTitle }}</span>
-                  </v-card-title>
-
-                  <v-card-text>
-                    <v-container>
-                      <v-row>
-                        <v-col cols="12" sm="6" md="4">
-                          <v-text-field
-                            v-model="editedItem.courseName"
-                            label="ชื่อหลักสูตร"
-                          ></v-text-field>
-                        </v-col>
-                        <v-col cols="12" sm="6" md="4">
-                          <v-switch
-                            v-model="editedItem.active"
-                            color="success"
-                            :error="!editedItem.active"
-                            label="การใช้งาน"
-                          ></v-switch>
-                        </v-col>
-                      </v-row>
-                    </v-container>
-                  </v-card-text>
-
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="blue darken-1" text @click="close">
-                      ยกเลิก
-                    </v-btn>
-                    <v-btn color="blue darken-1" text @click="save">
-                      ยืนยัน
-                    </v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
-              <v-dialog v-model="dialogDelete" max-width="500px">
-                <v-card>
-                  <v-card-title class="text-h5"
-                    >ต้องการลบผู้สอนหรือไม่ ?</v-card-title
-                  >
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="blue darken-1" text @click="closeDelete"
-                      >ยกเลิก</v-btn
-                    >
-                    <v-btn color="blue darken-1" text @click="deleteItemConfirm"
-                      >ยืนยัน</v-btn
-                    >
-                    <v-spacer></v-spacer>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
+              <v-btn color="primary" dark class="mb-2" to="addcourse">
+                เพิ่มหลักสูตร
+              </v-btn>
             </v-toolbar>
           </template>
           <template slot="item.index" scope="props">
             {{ props.index + 1 }}
           </template>
 
-          <template v-slot:item.active="{ item }">
+          <template v-slot:item.courseSta="{ item, index }">
             <div>
               <v-switch
-                v-model="item.active"
+                v-model="item.courseSta"
                 color="success"
-                :error="!item.active"
                 dense
+                @change="changeStatus(item.courseSta, item.courseId, index)"
               ></v-switch>
             </div>
           </template>
 
           <template v-slot:item.actions="{ item }">
-            <v-icon small class="mr-2" @click="editItem(item)" color="info">
+            <v-icon small class="mr-2" @click="editCourse(item)" color="info">
               mdi-pencil
             </v-icon>
-            <v-icon small @click="deleteItem(item)" color="error">
+            <v-icon small @click="deleteCourse(item)" color="error">
               mdi-delete
             </v-icon>
           </template>
@@ -120,9 +63,12 @@
 </template>
 
 <script>
+import "@/mixins/generalMixin";
+
 export default {
   name: "ShowCourses",
   data: () => ({
+    isLoading: false,
     dialog: false,
     dialogDelete: false,
     headers: [
@@ -132,22 +78,11 @@ export default {
         align: "start",
         value: "courseName",
       },
-      { text: "จำนวนรายวิชา", value: "subjects" },
-      { text: "การใช้งาน", value: "active" },
+      { text: "จำนวนรายวิชา", value: "subject" },
+      { text: "การใช้งาน", value: "courseSta" },
       { text: "แก้ไข/ลบ", value: "actions", sortable: false },
     ],
     courses: [],
-    editedIndex: -1,
-    editedItem: {
-      courseName: "",
-      subjects: "",
-      active: true,
-    },
-    defaultItem: {
-      courseName: "",
-      subjects: "",
-      active: true,
-    },
   }),
 
   computed: {
@@ -165,39 +100,93 @@ export default {
     },
   },
 
-  created() {
-    this.initialize();
-  },
-
   methods: {
-    initialize() {
-      this.courses = [
-        {
-          courseName: "ภาษาอังกฤษ",
-          subjects: 4,
-          active: true,
-        },
-        {
-          courseName: "ภาษาไทย",
-          subjects: 3,
-          active: true,
-        },
-        {
-          courseName: "ภาษาญี่ปุ่น",
-          subjects: 10,
-          active: false,
-        },
-      ];
+    getAllCourse() {
+      this.$http
+        .get(`${process.env.VUE_APP_API_PATH}/course/getAllCourse.php`)
+        .then((res) => {
+          this.courses = res.data;
+          console.log("courses", this.courses);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     },
 
-    editItem() {
-      this.$router.push("addcourse");
+    editCourse(item) {
+      this.$router.push({
+        name: "EditCourse",
+        query: { courseId: item.courseId },
+      });
     },
 
-    deleteItem(item) {
-      this.editedIndex = this.courses.indexOf(item);
-      this.editedItem = Object.assign({}, item);
-      this.dialogDelete = true;
+    changeStatus(status, courseId, index) {
+      console.log(index);
+      let courseSta = null;
+      status ? (courseSta = 1) : (courseSta = 0);
+
+      let formData = new FormData();
+      formData.append("courseSta", courseSta);
+      formData.append("courseId", courseId);
+
+      this.$http
+        .post(
+          `${process.env.VUE_APP_API_PATH}/course/updateCourseSta.php`,
+          formData
+        )
+        .then((res) => {
+          if (res.status === 200) {
+            console.log(this.courses[index]);
+          }
+        })
+        .catch((err) => {
+          this.isLoading = false;
+          this.$swal({
+            icon: "error",
+            text: err.response.data.message,
+            confirmButtonText: "ตกลง",
+            allowOutSideClick: false,
+          });
+        });
+    },
+
+    deleteCourse(item) {
+      this.$swal
+        .fire({
+          title: `ต้องการที่จะลบหลักสูตร ${item.courseName} หรือไม่`,
+          showDenyButton: true,
+          confirmButtonText: "ยืนยัน",
+          denyButtonText: `ยกเลิก`,
+        })
+        .then((result) => {
+          if (result.isConfirmed) {
+            const jsonData = JSON.stringify({
+              courseId: item.courseId,
+            });
+
+            this.$http
+              .post(
+                `${process.env.VUE_APP_API_PATH}/course/deleteCourse.php`,
+                jsonData
+              )
+              .then((res) => {
+                if (res.status === 200) {
+                  this.getAllCourse();
+                }
+              })
+              .catch((err) => {
+                this.isLoading = false;
+                this.$swal({
+                  icon: "error",
+                  text: err.response.data.message,
+                  confirmButtonText: "ตกลง",
+                  allowOutSideClick: false,
+                });
+              });
+          } else if (result.isDenied) {
+            return;
+          }
+        });
     },
 
     deleteItemConfirm() {
@@ -230,8 +219,8 @@ export default {
       this.close();
     },
   },
+  created() {
+    this.getAllCourse();
+  },
 };
 </script>
-
-<style>
-</style>

@@ -9,14 +9,14 @@
     :mini-variant-width="sidebarMinWidth"
   >
     <v-list-item>
-      <v-list-item-avatar>
+      <!-- <v-list-item-avatar>
         <v-avatar size="36px">
           <img src="@/assets/admin.png" alt="UserImg" />
         </v-avatar>
-      </v-list-item-avatar>
+      </v-list-item-avatar> -->
 
       <v-list-item-content>
-        <v-list-item-title>ผู้ดูแลระบบ</v-list-item-title>
+        <v-list-item-title>{{ title }}</v-list-item-title>
       </v-list-item-content>
     </v-list-item>
 
@@ -50,8 +50,9 @@ export default {
       model: 0,
       sidebarWidth: 240,
       sidebarMinWidth: 96,
+      title: "",
       navItems: [
-        { title: "หน้าหลัก", icon: "mdi-home", link: "/dashboard" },
+        { title: "หน้าหลัก", icon: "mdi-home", link: "/" },
         {
           title: "ผู้ใช้งานระบบ",
           icon: "mdi-account-group",
@@ -61,6 +62,11 @@ export default {
           title: "ผู้สอน",
           icon: "mdi-briefcase-account",
           link: "/teachers",
+        },
+        {
+          title: "ผู้เรียน",
+          icon: "mdi-folder-account",
+          link: "/students",
         },
         {
           title: "หลักสูตร",
@@ -119,6 +125,10 @@ export default {
   },
   methods: {
     ...mapActions("sidebar", ["toggleDrawer"]),
+  },
+  created() {
+    const userData = JSON.parse(localStorage.getItem("userData"));
+    this.title = userData.fullName;
   },
 };
 </script>

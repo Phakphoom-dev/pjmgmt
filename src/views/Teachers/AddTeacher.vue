@@ -32,7 +32,7 @@
               </v-row>
 
               <v-row class="mt-0">
-                <v-col cols="12" lg="4" xs="12">
+                <v-col cols="12" lg="6" xs="12">
                   <validation-provider
                     v-slot="{ errors }"
                     name="Password"
@@ -53,7 +53,7 @@
                   </validation-provider>
                 </v-col>
 
-                <v-col cols="12" lg="4" xs="12">
+                <v-col cols="12" lg="6" xs="12">
                   <validation-provider
                     v-slot="{ errors }"
                     name="Confirm Password"
@@ -87,7 +87,7 @@
                       dense
                       outlined
                       maxlength="20"
-                      v-model="userForm.firstname"
+                      v-model="userForm.firstName"
                       :error-messages="errors"
                       label="ชื่อ"
                       required
@@ -107,7 +107,7 @@
                       dense
                       outlined
                       maxlength="20"
-                      v-model="userForm.lastname"
+                      v-model="userForm.lastName"
                       :error-messages="errors"
                       label="นามสกุล"
                       required
@@ -126,7 +126,6 @@
                       prepend-icon="mdi-account"
                       dense
                       outlined
-                      maxlength="20"
                       v-model="userForm.email"
                       :error-messages="errors"
                       label="อีเมล"
@@ -186,20 +185,42 @@ export default {
     userForm: {
       username: "",
       password: "",
-      firstname: "",
-      lastname: "",
+      firstName: "",
+      lastName: "",
       email: "",
+      role: "teacher",
     },
-    confirmPassword: "12345",
+    confirmPassword: "",
   }),
   methods: {
-    submit() {
-      console.log(this.userForm);
-      this.$refs.observer.validate();
+    async submit() {
+      const isValid = await this.$refs.observer.validate();
+
+      if (isValid) {
+        this.isLoading = true;
+
+        let formData = new FormData();
+
+        for (const key in this.userForm) {
+          formData.append(key, this.userForm[key]);
+        }
+
+        this.$http
+          .post(`${process.env.VUE_APP_API_PATH}/user/addAdmin.php`, formData)
+          .then((res) => {
+            if (res.status === 200) {
+              this.isLoading = false;
+              this.$router.push({ name: "ShowTeachers" });
+            }
+          })
+          .catch((err) => {
+            this.isLoading;
+            console.log(err);
+          });
+      } else {
+        return;
+      }
     },
   },
 };
 </script>
-
-<style>
-</style>

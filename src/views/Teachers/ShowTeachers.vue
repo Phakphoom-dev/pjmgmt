@@ -14,88 +14,31 @@
               <v-toolbar-title>จัดการผู้สอน</v-toolbar-title>
               <v-divider class="mx-4" inset vertical></v-divider>
               <v-spacer></v-spacer>
-              <v-dialog v-model="dialog" max-width="500px">
-                <template v-slot:activator="{}">
-                  <v-btn color="primary" dark class="mb-2" to="addteacher">
-                    เพิ่มผู้สอน
-                  </v-btn>
-                </template>
-                <v-card>
-                  <v-card-title>
-                    <span class="text-h5">{{ formTitle }}</span>
-                  </v-card-title>
-
-                  <v-card-text>
-                    <v-container>
-                      <v-row>
-                        <v-col cols="12" sm="6" md="4">
-                          <v-text-field
-                            v-model="editedItem.fullname"
-                            label="ชื่อ-นามสกุล"
-                          ></v-text-field>
-                        </v-col>
-                        <v-col cols="12" sm="6" md="4">
-                          <v-switch
-                            v-model="editedItem.active"
-                            color="success"
-                            :error="!editedItem.active"
-                            label="การใช้งาน"
-                          ></v-switch>
-                        </v-col>
-                      </v-row>
-                    </v-container>
-                  </v-card-text>
-
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="blue darken-1" text @click="close">
-                      ยกเลิก
-                    </v-btn>
-                    <v-btn color="blue darken-1" text @click="save">
-                      ยืนยัน
-                    </v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
-              <v-dialog v-model="dialogDelete" max-width="500px">
-                <v-card>
-                  <v-card-title class="text-h5"
-                    >ต้องการลบผู้สอนหรือไม่ ?</v-card-title
-                  >
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="blue darken-1" text @click="closeDelete"
-                      >ยกเลิก</v-btn
-                    >
-                    <v-btn color="blue darken-1" text @click="deleteItemConfirm"
-                      >ยืนยัน</v-btn
-                    >
-                    <v-spacer></v-spacer>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
+              <v-btn color="primary" dark class="mb-2" to="addteacher">
+                เพิ่มผู้สอน
+              </v-btn>
             </v-toolbar>
           </template>
           <template slot="item.index" scope="props">
             {{ props.index + 1 }}
           </template>
 
-          <template v-slot:item.active="{ item }">
+          <template v-slot:item.active="{ item, index }">
             <div>
               <v-switch
-                v-model="item.active"
+                v-model="item.status"
                 color="success"
-                :error="!item.active"
                 dense
+                @change="changeStatus(item.status, item.adminId, index)"
               ></v-switch>
             </div>
           </template>
 
           <template v-slot:item.actions="{ item }">
-            <v-icon small class="mr-2" @click="editItem(item)" color="info">
+            <v-icon small class="mr-2" @click="editUser(item)" color="info">
               mdi-pencil
             </v-icon>
-            <v-icon small @click="deleteItem(item)" color="error">
+            <v-icon small @click="deleteUser(item)" color="error">
               mdi-delete
             </v-icon>
           </template>
@@ -110,28 +53,17 @@
 export default {
   name: "ShowTeachers",
   data: () => ({
-    dialog: false,
-    dialogDelete: false,
     headers: [
       { text: "ลำดับที่", value: "index" },
       {
         text: "ชื่อ-นามสกุล",
         align: "start",
-        value: "fullname",
+        value: "fullName",
       },
       { text: "การใช้งาน", value: "active" },
       { text: "แก้ไข/ลบ", value: "actions", sortable: false },
     ],
     teachers: [],
-    editedIndex: -1,
-    editedItem: {
-      fullname: "",
-      active: true,
-    },
-    defaultItem: {
-      fullname: "",
-      active: true,
-    },
   }),
 
   computed: {
@@ -140,79 +72,92 @@ export default {
     },
   },
 
-  watch: {
-    dialog(val) {
-      val || this.close();
-    },
-    dialogDelete(val) {
-      val || this.closeDelete();
-    },
-  },
-
-  created() {
-    this.initialize();
-  },
-
   methods: {
-    initialize() {
-      this.teachers = [
-        {
-          fullname: "ผู้บริหาร",
-          active: true,
-        },
-        {
-          fullname: "ทดสอบ ผู้สอน",
-          active: true,
-        },
-        {
-          fullname: "ทดสอบ ผู้สอน2",
-          active: false,
-        },
-      ];
-    },
-
-    editItem() {
-      this.$router.push("addteacher");
-    },
-
-    deleteItem(item) {
-      this.editedIndex = this.teachers.indexOf(item);
-      this.editedItem = Object.assign({}, item);
-      this.dialogDelete = true;
-    },
-
-    deleteItemConfirm() {
-      this.teachers.splice(this.editedIndex, 1);
-      this.closeDelete();
-    },
-
-    close() {
-      this.dialog = false;
-      this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
-        this.editedIndex = -1;
+    editUser(item) {
+      this.$router.push({
+        name: "EditTeacher",
+        query: { adminId: item.adminId },
       });
     },
 
-    closeDelete() {
-      this.dialogDelete = false;
-      this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
-        this.editedIndex = -1;
-      });
+    changeStatus(status, adminId, index) {
+      console.log(index);
+      let adminStatus = null;
+      status ? (adminStatus = 1) : (adminStatus = 0);
+
+      let formData = new FormData();
+      formData.append("status", adminStatus);
+      formData.append("adminId", adminId);
+
+      this.$http
+        .post(`${process.env.VUE_APP_API_PATH}/user/updateTeaSta.php`, formData)
+        .then((res) => {
+          if (res.status === 200) {
+            console.log(this.teachers[index]);
+          }
+        })
+        .catch((err) => {
+          this.isLoading = false;
+          this.$swal({
+            icon: "error",
+            text: err.response.data.message,
+            confirmButtonText: "ตกลง",
+            allowOutSideClick: false,
+          });
+        });
     },
 
-    save() {
-      if (this.editedIndex > -1) {
-        Object.assign(this.teachers[this.editedIndex], this.editedItem);
-      } else {
-        this.teachers.push(this.editedItem);
-      }
-      this.close();
+    getAllTeacher() {
+      this.$http
+        .get(`${process.env.VUE_APP_API_PATH}/user/getAllAdmin.php`)
+        .then((res) => {
+          this.teachers = res.data;
+          this.teachers = this.teachers.filter((teacher) => {
+            return teacher.role === "teacher";
+          });
+          console.log("teachers", this.teachers);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     },
+
+    deleteUser(item) {
+      this.$swal
+        .fire({
+          title: `ต้องการที่จะลบ ${item.fullName} หรือไม่`,
+          showDenyButton: true,
+          confirmButtonText: "ยืนยัน",
+          denyButtonText: `ยกเลิก`,
+        })
+        .then((result) => {
+          if (result.isConfirmed) {
+            const jsonData = JSON.stringify({
+              adminId: item.adminId,
+            });
+
+            this.$http
+              .post(
+                `${process.env.VUE_APP_API_PATH}/user/deleteAdmin.php`,
+                jsonData
+              )
+              .then((res) => {
+                if (res.status === 200) {
+                  this.getAllTeacher();
+                }
+              })
+              .catch((err) => {
+                this.isLoading = false;
+                console.log(err);
+              });
+          } else if (result.isDenied) {
+            return;
+          }
+        });
+    },
+  },
+  created() {
+    this.getAllTeacher();
   },
 };
 </script>
-
-<style>
-</style>

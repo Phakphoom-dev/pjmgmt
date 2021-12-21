@@ -4,7 +4,7 @@
       ><v-icon small class="mr-1">mdi-arrow-left</v-icon> ย้อนกลับ</v-btn
     >
     <v-card class="mt-3">
-      <v-card-title>เพิ่มหลักสูตร</v-card-title>
+      <v-card-title>เพิ่มรายวิชา</v-card-title>
       <v-card-text>
         <validation-observer ref="observer">
           <v-form @submit.prevent="submit">
@@ -20,6 +20,8 @@
                       dense
                       prepend-icon="mdi-book-open"
                       :items="coursesName"
+                      item-value="courseId"
+                      item-text="courseName"
                       v-model="subjectForm.courseName"
                       :error-messages="errors"
                       label="ชื่อหลักสูตร"
@@ -91,6 +93,7 @@
 </template>
 
 <script>
+import "@/mixins/generalMixin.js";
 import {
   extend,
   ValidationObserver,
@@ -119,7 +122,7 @@ export default {
       subjectName: "",
       teacherList: [],
     },
-    coursesName: ["ภาษาอังกฤษ", "ภาษาไทย", "ภาษาญี่ปุ่น"],
+    coursesName: [],
     teachers: ["ผู้บริหาร", "ทดสอบ ผู้สอน", "ทดสอบ ผู้สอน2"],
   }),
   computed: {
@@ -136,8 +139,8 @@ export default {
       });
     },
   },
+  async created() {
+    this.coursesName = await this.get("/course/getAllCourse.php");
+  },
 };
 </script>
-
-<style>
-</style>

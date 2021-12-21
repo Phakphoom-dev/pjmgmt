@@ -87,7 +87,7 @@
                       dense
                       outlined
                       maxlength="20"
-                      v-model="userForm.firstname"
+                      v-model="userForm.firstName"
                       :error-messages="errors"
                       label="ชื่อ"
                       required
@@ -107,7 +107,7 @@
                       dense
                       outlined
                       maxlength="20"
-                      v-model="userForm.lastname"
+                      v-model="userForm.lastName"
                       :error-messages="errors"
                       label="นามสกุล"
                       required
@@ -126,7 +126,7 @@
                       prepend-icon="mdi-account"
                       dense
                       outlined
-                      maxlength="20"
+                      maxlength="100"
                       v-model="userForm.email"
                       :error-messages="errors"
                       label="อีเมล"
@@ -158,7 +158,15 @@
 
               <v-col cols="12">
                 <v-btn class="mr-4" type="submit" block color="primary">
-                  ยืนยัน
+                  <v-btn color="blue darken-1" text @click="submit">
+                    <v-progress-circular
+                      v-if="isLoading"
+                      indeterminate
+                      color="white"
+                      :width="5"
+                    ></v-progress-circular>
+                    <span v-else style="color: white">ยืนยัน</span></v-btn
+                  >
                 </v-btn>
               </v-col>
             </v-container>
@@ -202,25 +210,47 @@ export default {
     ValidationObserver,
   },
   data: () => ({
+    isLoading: false,
     valid: true,
     userForm: {
       username: "",
       password: "",
-      firstname: "",
-      lastname: "",
+      firstName: "",
+      lastName: "",
       email: "",
       role: "",
     },
-    confirmPassword: "12345",
+    confirmPassword: "",
   }),
   methods: {
-    submit() {
-      console.log(this.userForm);
-      this.$refs.observer.validate();
+    async submit() {
+      const isValid = await this.$refs.observer.validate();
+
+      if (isValid) {
+        this.isLoading = true;
+
+        let formData = new FormData();
+
+        for (const key in this.userForm) {
+          formData.append(key, this.userForm[key]);
+        }
+
+        this.$http
+          .post(`${process.env.VUE_APP_API_PATH}/user/addAdmin.php`, formData)
+          .then((res) => {
+            if (res.status === 200) {
+              this.isLoading = false;
+              this.$router.push({ name: "ShowUsers" });
+            }
+          })
+          .catch((err) => {
+            this.isLoading;
+            console.log(err);
+          });
+      } else {
+        return;
+      }
     },
   },
 };
 </script>
-
-<style>
-</style>

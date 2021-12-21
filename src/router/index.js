@@ -11,6 +11,7 @@ import Quizs from "@/views/Quizs/Quizs.vue";
 import Exams from "@/views/Exams/Exams.vue";
 import News from "@/views/News/News.vue";
 import Reports from "@/views/Reports/Reports.vue";
+import Students from "@/views/Students/Students.vue";
 
 // Pages
 import About from "@/views/About.vue";
@@ -18,10 +19,13 @@ import Error from "@/views/Error/Error.vue";
 import Login from "@/views/Login/Login.vue";
 import Dashboard from "@/views/Dashboard/Dashboard.vue";
 import ShowUsers from "@/views/Users/ShowUsers.vue";
+import EditUser from "@/views/Users/EditUser.vue";
 import AddUser from "@/views/Users/AddUser.vue";
+import EditTeacher from "@/views/Teachers/EditTeacher.vue";
 import ShowCourses from "@/views/Courses/ShowCourses.vue";
 import AddTeacher from "@/views/Teachers/AddTeacher.vue";
 import AddCourse from "@/views/Courses/AddCourse.vue";
+import EditCourse from "@/views/Courses/EditCourse.vue";
 import ShowTeachers from "@/views/Teachers/ShowTeachers.vue";
 import ShowSubjects from "@/views/Subjects/ShowSubjects.vue";
 import AddSubject from "@/views/Subjects/AddSubject.vue";
@@ -38,6 +42,9 @@ import ShowReports from "@/views/Reports/ShowReports.vue";
 import VisitReport from "@/views/Reports/VisitReport.vue";
 import QuizReport from "@/views/Reports/QuizReport.vue";
 import ExamReport from "@/views/Reports/ExamReport.vue";
+import ShowStudents from "@/views/Students/ShowStudents.vue";
+import AddStudent from "@/views/Students/AddStudent.vue";
+import EditStudent from "@/views/Students/EditStudent.vue";
 
 Vue.use(VueRouter);
 
@@ -73,6 +80,11 @@ const routes = [
             name: "AddUser",
             component: AddUser,
           },
+          {
+            path: "edituser",
+            name: "EditUser",
+            component: EditUser,
+          },
         ],
       },
       {
@@ -91,6 +103,11 @@ const routes = [
             name: "AddTeacher",
             component: AddTeacher,
           },
+          {
+            path: "edit-teacher",
+            name: "EditTeacher",
+            component: EditTeacher,
+          },
         ],
       },
       {
@@ -108,6 +125,11 @@ const routes = [
             path: "addcourse",
             name: "AddCourse",
             component: AddCourse,
+          },
+          {
+            path: "edit-course",
+            name: "EditCourse",
+            component: EditCourse,
           },
         ],
       },
@@ -234,7 +256,29 @@ const routes = [
           },
         ],
       },
-
+      {
+        path: "students",
+        name: "Students",
+        component: Students,
+        redirect: "students/showstudents",
+        children: [
+          {
+            path: "showstudents",
+            name: "ShowStudents",
+            component: ShowStudents,
+          },
+          {
+            path: "addstudent",
+            name: "AddStudent",
+            component: AddStudent,
+          },
+          {
+            path: "edit-student",
+            name: "EditStudent",
+            component: EditStudent,
+          },
+        ],
+      },
       {
         path: "about",
         name: "About",

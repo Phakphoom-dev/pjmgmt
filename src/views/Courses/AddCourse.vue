@@ -33,7 +33,13 @@
 
               <v-col cols="12">
                 <v-btn class="mr-4" type="submit" block color="primary">
-                  ยืนยัน
+                  <v-progress-circular
+                    v-if="isLoading"
+                    indeterminate
+                    color="white"
+                    :width="5"
+                  ></v-progress-circular>
+                  <span v-else>ยืนยัน</span>
                 </v-btn>
               </v-col>
             </v-container>
@@ -67,17 +73,40 @@ export default {
     ValidationObserver,
   },
   data: () => ({
+    isLoading: false,
     valid: true,
     courseName: "",
   }),
   methods: {
-    submit() {
-      console.log(this.courseName);
-      this.$refs.observer.validate();
+    async submit() {
+      const isValid = await this.$refs.observer.validate();
+
+      if (isValid) {
+        this.isLoading = true;
+
+        let formData = new FormData();
+
+        formData.append("courseName", this.courseName);
+
+        this.$http
+          .post(
+            `${process.env.VUE_APP_API_PATH}/course/addCourse.php`,
+            formData
+          )
+          .then((res) => {
+            if (res.status === 200) {
+              this.isLoading = false;
+              this.$router.push({ name: "ShowCourses" });
+            }
+          })
+          .catch((err) => {
+            this.isLoading;
+            console.log(err);
+          });
+      } else {
+        return;
+      }
     },
   },
 };
 </script>
-
-<style>
-</style>

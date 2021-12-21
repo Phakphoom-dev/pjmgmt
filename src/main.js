@@ -22,8 +22,13 @@ Vue.use(VueMoment, {
 });
 
 router.beforeEach((to, from, next) => {
-  console.log(to, from);
-  // const user = JSON.parse(localStorage.getItem("user"));
+  if (to.path !== "/login") {
+    const isLogin = JSON.parse(localStorage.getItem("isLogin"));
+
+    if (!isLogin) {
+      next("login");
+    }
+  }
 
   // if (to.path === "/dashboard") {
   //   user ? next() : next({ path: "/login" });
