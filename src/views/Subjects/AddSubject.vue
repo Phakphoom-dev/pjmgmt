@@ -22,7 +22,7 @@
                       :items="coursesName"
                       item-value="courseId"
                       item-text="courseName"
-                      v-model="subjectForm.courseName"
+                      v-model="subjectForm.courseId"
                       :error-messages="errors"
                       label="ชื่อหลักสูตร"
                       outlined
@@ -66,6 +66,8 @@
                           dense
                           prepend-icon="mdi-account"
                           :items="teachers"
+                          item-value="teacherId"
+                          item-text="fullName"
                           v-model="subjectForm.teacherList"
                           label="อาจารย์ผู้สอน"
                           :error-messages="errors"
@@ -118,12 +120,12 @@ export default {
   data: () => ({
     valid: true,
     subjectForm: {
-      courseName: "",
+      courseId: "",
       subjectName: "",
       teacherList: [],
     },
     coursesName: [],
-    teachers: ["ผู้บริหาร", "ทดสอบ ผู้สอน", "ทดสอบ ผู้สอน2"],
+    teachers: [],
   }),
   computed: {
     teacherList() {
@@ -132,15 +134,29 @@ export default {
   },
   methods: {
     submit() {
+      this.isLoading = true;
       this.$refs.observer.validate().then((result) => {
         if (result) {
-          console.log(this.subjectForm);
+          let formData = new FormData();
+
+          for (const key in this.subjectForm) {
+            formData.append(key, this.subjectForm[key]);
+            console.log(this.subjectForm[key]);
+          }
+
+          this.post("/subject/addSubject.php", formData).then((res) => {
+            if (res.status === 200) {
+              this.isLoading = false;
+              this.$router.push({ name: "ShowSubjects" });
+            }
+          });
         }
       });
     },
   },
   async created() {
     this.coursesName = await this.get("/course/getAllCourse.php");
+    this.teachers = await this.get("/user/getAllTeacher.php");
   },
 };
 </script>

@@ -11,69 +11,12 @@
         >
           <template v-slot:top>
             <v-toolbar flat>
-              <v-toolbar-title>จัดการเรียน</v-toolbar-title>
+              <v-toolbar-title>จัดการผู้เรียน</v-toolbar-title>
               <v-divider class="mx-4" inset vertical></v-divider>
               <v-spacer></v-spacer>
-              <v-dialog v-model="dialog" max-width="500px">
-                <template v-slot:activator="{}">
-                  <v-btn color="primary" dark class="mb-2" to="addstudent">
-                    เพิ่มผู้เรียน
-                  </v-btn>
-                </template>
-                <v-card>
-                  <v-card-title>
-                    <span class="text-h5">{{ formTitle }}</span>
-                  </v-card-title>
-
-                  <v-card-text>
-                    <v-container>
-                      <v-row>
-                        <v-col cols="12" sm="6" md="4">
-                          <v-text-field
-                            v-model="editedItem.fullname"
-                            label="ชื่อ-นามสกุล"
-                          ></v-text-field>
-                        </v-col>
-                        <v-col cols="12" sm="6" md="4">
-                          <v-switch
-                            v-model="editedItem.active"
-                            color="success"
-                            :error="!editedItem.active"
-                            label="การใช้งาน"
-                          ></v-switch>
-                        </v-col>
-                      </v-row>
-                    </v-container>
-                  </v-card-text>
-
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="blue darken-1" text @click="close">
-                      ยกเลิก
-                    </v-btn>
-                    <v-btn color="blue darken-1" text @click="save">
-                      ยืนยัน
-                    </v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
-              <v-dialog v-model="dialogDelete" max-width="500px">
-                <v-card>
-                  <v-card-title class="text-h5"
-                    >ต้องการลบผู้สอนหรือไม่ ?</v-card-title
-                  >
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="blue darken-1" text @click="closeDelete"
-                      >ยกเลิก</v-btn
-                    >
-                    <v-btn color="blue darken-1" text @click="deleteItemConfirm"
-                      >ยืนยัน</v-btn
-                    >
-                    <v-spacer></v-spacer>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
+              <v-btn color="primary" dark class="mb-2" to="addstudent">
+                เพิ่มผู้เรียน
+              </v-btn>
             </v-toolbar>
           </template>
 
@@ -113,6 +56,31 @@
         </v-data-table>
       </v-col>
     </v-row>
+
+    <v-row justify="center">
+      <v-dialog v-model="dialog" scrollable max-width="400px">
+        <v-card>
+          <v-card-title>หลักสูตรที่ลงทะเบียน</v-card-title>
+          <v-divider></v-divider>
+          <v-card-text style="height: 300px">
+            <v-row class="mt-2" cols="12">
+              <v-col
+                cols="12"
+                v-for="(course, index) in courses"
+                :key="course.courseId"
+                ><h6>{{ index + 1 }}. {{ course.courseName }}</h6></v-col
+              >
+            </v-row>
+          </v-card-text>
+          <v-divider></v-divider>
+          <v-card-actions>
+            <v-btn color="blue darken-1" text @click="dialog = false">
+              ปิด
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-row>
   </v-container>
 </template>
 
@@ -124,7 +92,6 @@ export default {
   data: () => ({
     imgPath: process.env.VUE_APP_IMG_PATH,
     dialog: false,
-    dialogDelete: false,
     headers: [
       { text: "ลำดับที่", value: "index", sortable: false },
       { text: "รูปภาพ", value: "stdImg", sortable: false },
@@ -138,6 +105,7 @@ export default {
       { text: "แก้ไข/ลบ", value: "actions", sortable: false },
     ],
     students: [],
+    courses: [],
     editedIndex: -1,
     editedItem: {
       fullname: "",
@@ -152,15 +120,6 @@ export default {
   computed: {
     formTitle() {
       return this.editedIndex === -1 ? "เพิ่มผู้สอน" : "แก้ไขผู้สอน";
-    },
-  },
-
-  watch: {
-    dialog(val) {
-      val || this.close();
-    },
-    dialogDelete(val) {
-      val || this.closeDelete();
     },
   },
 
@@ -204,12 +163,14 @@ export default {
           }
         });
     },
+
     editStd(item) {
       this.$router.push({
         name: "EditStudent",
         query: { stdId: item.stdId },
       });
     },
+
     watchCourse(item) {
       const jsonData = JSON.stringify({ stdId: item.stdId });
 
@@ -219,16 +180,15 @@ export default {
           jsonData
         )
         .then((res) => {
-          this.$swal.fire({
-            title: `${res.data.map((course) => " " + course.courseName)}`,
-            showConfirmButton: false,
-          });
+          this.dialog = true;
+          this.courses = res.data;
         })
         .catch((err) => {
           this.isLoading = false;
           console.log(err);
         });
     },
+
     getAllStudent() {
       this.$http
         .get(`${process.env.VUE_APP_API_PATH}/student/getAllStudent.php`)
@@ -261,45 +221,6 @@ export default {
           break;
       }
       return color;
-    },
-    editItem() {
-      this.$router.push("addteacher");
-    },
-
-    deleteItem(item) {
-      this.editedIndex = this.teachers.indexOf(item);
-      this.editedItem = Object.assign({}, item);
-      this.dialogDelete = true;
-    },
-
-    deleteItemConfirm() {
-      this.teachers.splice(this.editedIndex, 1);
-      this.closeDelete();
-    },
-
-    close() {
-      this.dialog = false;
-      this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
-        this.editedIndex = -1;
-      });
-    },
-
-    closeDelete() {
-      this.dialogDelete = false;
-      this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
-        this.editedIndex = -1;
-      });
-    },
-
-    save() {
-      if (this.editedIndex > -1) {
-        Object.assign(this.teachers[this.editedIndex], this.editedItem);
-      } else {
-        this.teachers.push(this.editedItem);
-      }
-      this.close();
     },
   },
 

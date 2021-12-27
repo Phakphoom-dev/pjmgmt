@@ -98,12 +98,12 @@ export default {
         })
         .catch((err) => {
           this.isLoading = false;
-          this.$swal({
-            icon: "error",
-            text: err.response.data.message,
-            confirmButtonText: "ตกลง",
-            allowOutSideClick: false,
+          this.$toast.open({
+            message: err.response.data.message,
+            type: "warning",
+            position: "top-right",
           });
+          this.getAllTeacher();
         });
     },
 
@@ -143,12 +143,18 @@ export default {
               )
               .then((res) => {
                 if (res.status === 200) {
+                  this.$toast.open("ลบผู้สอนสำเร็จ");
                   this.getAllTeacher();
                 }
               })
               .catch((err) => {
                 this.isLoading = false;
-                console.log(err);
+                this.$swal({
+                  icon: "error",
+                  text: err.response.data.message,
+                  confirmButtonText: "ตกลง",
+                  allowOutsideClick: false,
+                });
               });
           } else if (result.isDenied) {
             return;

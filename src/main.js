@@ -11,8 +11,20 @@ import "sweetalert2/dist/sweetalert2.min.css";
 import CKEditor from "ckeditor4-vue";
 import VueMoment from "vue-moment";
 import moment from "moment-timezone";
-moment.tz.setDefault("Asia/Jakarta");
+import VueToast from "vue-toast-notification";
+import "vue-toast-notification/dist/theme-sugar.css";
+import VueQuillEditor from "vue-quill-editor";
 
+import "quill/dist/quill.core.css";
+import "quill/dist/quill.snow.css";
+import "quill/dist/quill.bubble.css";
+
+Vue.use(VueQuillEditor /* { default global options } */);
+
+moment.tz.setDefault("Asia/Jakarta");
+Vue.use(VueToast, {
+  position: "top-right",
+});
 Vue.use(CKEditor);
 Vue.use(VueSweetalert2);
 Vue.prototype.$http = Axios;

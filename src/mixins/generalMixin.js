@@ -11,5 +11,11 @@ Vue.mixin({
         .catch((err) => console.log(err));
       return data.data;
     },
+    async post(path, formData) {
+      const data = await this.$http
+        .post(`${process.env.VUE_APP_API_PATH}${path}`, formData)
+        .catch((err) => console.log(err));
+      return data;
+    },
   },
 });

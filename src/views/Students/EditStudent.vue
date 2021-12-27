@@ -372,12 +372,6 @@ export default {
           this.userForm.courseId = stdCourse.map((course) => course.courseId);
           console.log("course", this.userForm);
           this.onLoad = false;
-          this.$nextTick(() => {
-            this.$refs.courseSelect.focus();
-          });
-          this.$nextTick(() => {
-            this.$refs.title.click();
-          });
         })
         .catch((err) => {
           this.isLoading = false;

@@ -153,7 +153,6 @@ export default {
     },
 
     deleteUser(item) {
-      console.log(item);
       this.$swal
         .fire({
           title: `ต้องการที่จะลบ ${item.fullName} หรือไม่`,
@@ -175,10 +174,17 @@ export default {
               .then((res) => {
                 if (res.status === 200) {
                   this.getAllAdmin();
+                  this.$toast.open("ลบผู้ใช้งานสำเร็จ");
                 }
               })
               .catch((err) => {
                 this.isLoading = false;
+                this.$swal({
+                  icon: "error",
+                  text: err.response.data.message,
+                  confirmButtonText: "ตกลง",
+                  allowOutsideClick: false,
+                });
                 console.log(err);
               });
           } else if (result.isDenied) {

@@ -29,6 +29,7 @@ import EditCourse from "@/views/Courses/EditCourse.vue";
 import ShowTeachers from "@/views/Teachers/ShowTeachers.vue";
 import ShowSubjects from "@/views/Subjects/ShowSubjects.vue";
 import AddSubject from "@/views/Subjects/AddSubject.vue";
+import EditSubject from "@/views/Subjects/EditSubject.vue";
 import ShowLessons from "@/views/Lessons/ShowLessons.vue";
 import AddLesson from "@/views/Lessons/AddLesson.vue";
 import ShowQuizs from "@/views/Quizs/ShowQuizs.vue";
@@ -148,6 +149,11 @@ const routes = [
             path: "addsubject",
             name: "AddSubject",
             component: AddSubject,
+          },
+          {
+            path: "edit-subject",
+            name: "EditSubject",
+            component: EditSubject,
           },
         ],
       },

@@ -141,12 +141,12 @@ export default {
         })
         .catch((err) => {
           this.isLoading = false;
-          this.$swal({
-            icon: "error",
-            text: err.response.data.message,
-            confirmButtonText: "ตกลง",
-            allowOutSideClick: false,
+          this.$toast.open({
+            message: err.response.data.message,
+            type: "warning",
+            position: "top-right",
           });
+          this.getAllCourse();
         });
     },
 
@@ -172,10 +172,12 @@ export default {
               .then((res) => {
                 if (res.status === 200) {
                   this.getAllCourse();
+                  this.$toast.open("ลบข้อมูลหลักสูตรสำเร็จ");
                 }
               })
               .catch((err) => {
                 this.isLoading = false;
+                console.log(err.response.data);
                 this.$swal({
                   icon: "error",
                   text: err.response.data.message,

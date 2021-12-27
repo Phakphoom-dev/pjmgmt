@@ -324,24 +324,24 @@ export default {
     ],
     courses: [],
     userForm: {
-      username: "asdf1234",
-      password: "1234",
-      firstName: "Student",
-      lastName: "1",
-      email: "asdf@gmail.com",
-      prefix: "นาย",
-      lineId: "asdfLine",
-      tel: "0920192019",
+      username: "",
+      password: "",
+      firstName: "",
+      lastName: "",
+      email: "",
+      prefix: "",
+      lineId: "",
+      tel: "",
       courseId: "",
-      objective: "เพื่อใช้ในการสอบเข้ามหาวิทยาลัยภายในประเทศ",
+      objective: "",
       stdImg: null,
     },
-    confirmPassword: "1234",
+    confirmPassword: "",
   }),
   methods: {
     getAllCourse() {
       this.$http
-        .get(`${process.env.VUE_APP_API_PATH}/course/getAllCourse.php`)
+        .get(`${process.env.VUE_APP_API_PATH}/course/getAllActiveCourse.php`)
         .then((res) => {
           this.courses = res.data;
           console.log("courses", this.courses);
