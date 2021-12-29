@@ -29,7 +29,7 @@
               <v-img
                 max-height="150"
                 max-width="250"
-                :src="stdImgPath(item.stdImg)"
+                :src="imgPath(item.stdImg, 'student')"
               ></v-img>
             </div>
           </template>
@@ -90,7 +90,6 @@ import "@/mixins/generalMixin";
 export default {
   name: "ShowStudents",
   data: () => ({
-    imgPath: process.env.VUE_APP_IMG_PATH,
     dialog: false,
     headers: [
       { text: "ลำดับที่", value: "index", sortable: false },

@@ -7,6 +7,3 @@ export default {
   name: "Users",
 };
 </script>
-
-<style>
-</style>

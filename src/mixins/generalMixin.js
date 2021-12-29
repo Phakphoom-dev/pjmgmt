@@ -2,8 +2,8 @@ import Vue from "vue";
 
 Vue.mixin({
   methods: {
-    stdImgPath(stdImg) {
-      return `${process.env.VUE_APP_IMG_PATH}/student/${stdImg}`;
+    imgPath(img, folder) {
+      return `${process.env.VUE_APP_IMG_PATH}/${folder}/${img}`;
     },
     async get(path) {
       const data = await this.$http

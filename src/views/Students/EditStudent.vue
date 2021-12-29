@@ -78,7 +78,7 @@
               <v-row class="mb-3" align="center" justify="center">
                 <v-img
                   v-if="!userForm.newImg"
-                  :src="stdImgPath(userForm.stdImg)"
+                  :src="imgPath(userForm.stdImg, 'student')"
                   max-height="300"
                   max-width="300"
                 ></v-img>
@@ -286,6 +286,8 @@
 </template>
 
 <script>
+import "@/mixins/generalMixin";
+
 import Loading from "@/components/Loading";
 import {
   extend,
@@ -344,9 +346,6 @@ export default {
     confirmPassword: "",
   }),
   methods: {
-    stdImgPath(stdImg) {
-      return `${process.env.VUE_APP_IMG_PATH}/student/${stdImg}`;
-    },
     getAllCourse() {
       this.$http
         .get(`${process.env.VUE_APP_API_PATH}/course/getAllCourse.php`)

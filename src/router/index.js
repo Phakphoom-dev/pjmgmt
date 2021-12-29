@@ -31,6 +31,7 @@ import ShowSubjects from "@/views/Subjects/ShowSubjects.vue";
 import AddSubject from "@/views/Subjects/AddSubject.vue";
 import EditSubject from "@/views/Subjects/EditSubject.vue";
 import ShowLessons from "@/views/Lessons/ShowLessons.vue";
+import EditLesson from "@/views/Lessons/EditLesson.vue";
 import AddLesson from "@/views/Lessons/AddLesson.vue";
 import ShowQuizs from "@/views/Quizs/ShowQuizs.vue";
 import QuizLesson from "@/views/Quizs/QuizLesson.vue";
@@ -172,6 +173,11 @@ const routes = [
             path: "addlesson",
             name: "AddLesson",
             component: AddLesson,
+          },
+          {
+            path: "edit-lesson",
+            name: "EditLesson",
+            component: EditLesson,
           },
         ],
       },

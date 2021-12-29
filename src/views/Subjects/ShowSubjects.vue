@@ -144,12 +144,24 @@ export default {
               courseId: item.courseId,
             });
 
-            this.post("/subject/deleteSubject.php", jsonData).then((res) => {
-              if (res.status === 200) {
-                this.initialize();
-                this.$toast.open("ลบรายวิชาสำเร็จ");
-              }
-            });
+            this.$http
+              .post(
+                `${process.env.VUE_APP_API_PATH}/subject/deleteSubject.php`,
+                jsonData
+              )
+              .then((res) => {
+                if (res.status === 200) {
+                  this.initialize();
+                  this.$toast.open("ลบรายวิชาสำเร็จ");
+                }
+              })
+              .catch((err) => {
+                console.log(err.response.data);
+                this.$toast.open({
+                  message: err.response.data.message,
+                  type: "warning",
+                });
+              });
           } else if (result.isDenied) {
             return;
           }

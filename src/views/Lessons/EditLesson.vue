@@ -53,35 +53,34 @@
                 </v-col>
               </v-row>
 
+              <v-row class="mb-3" align="center" justify="center">
+                <v-img
+                  v-if="!lessonForm.newImage"
+                  :src="imgPath(lessonForm.lessonImage, 'lesson')"
+                  max-height="300"
+                  max-width="300"
+                ></v-img>
+                <v-img
+                  v-else
+                  :src="url"
+                  max-height="300"
+                  max-width="300"
+                ></v-img>
+              </v-row>
+
               <v-row no-gutters>
-                <v-col cols="12" v-if="lessonForm.lessonImage">
-                  <v-img
-                    class="mx-auto"
-                    :aspect-ratio="16 / 9"
-                    :src="url"
-                    max-height="300"
-                    max-width="500"
-                  ></v-img>
-                </v-col>
                 <v-col cols="12">
-                  <validation-provider
-                    v-slot="{ errors }"
-                    name="ภาพประกอบ"
-                    rules="required"
-                  >
-                    <v-file-input
-                      class="mt-2"
-                      @change="previewImage"
-                      v-model="lessonForm.lessonImage"
-                      accept="image/*"
-                      label="ภาพประกอบ"
-                      outlined
-                      :error-messages="errors"
-                      truncate-length="50"
-                      prepend-icon="mdi-image"
-                      dense
-                    ></v-file-input>
-                  </validation-provider>
+                  <v-file-input
+                    class="mt-2"
+                    @change="previewImage"
+                    v-model="lessonForm.newImage"
+                    accept="image/*"
+                    label="ภาพประกอบ"
+                    outlined
+                    truncate-length="50"
+                    prepend-icon="mdi-image"
+                    dense
+                  ></v-file-input>
                 </v-col>
               </v-row>
 
@@ -345,7 +344,7 @@ extend("required", {
 });
 
 export default {
-  name: "AddLesson",
+  name: "EditLesson",
   components: {
     ValidationProvider,
     ValidationObserver,
@@ -372,6 +371,7 @@ export default {
       lessonName: "",
       lessonImage: null,
       files: [],
+      newImage: null,
     },
     lessonVideo: null,
     subjects: [],
@@ -419,7 +419,8 @@ export default {
                 console.log(err.response);
                 this.$swal.fire({
                   icon: "error",
-                  title: err.response.data.message,
+                  title:
+                    "ไม่สามารถลบวิดีโอได้เนื่องจากมีการใช้งานวิดีโอนี้อยู่",
                   confirmButtonText: "ตกลง",
                 });
               });
@@ -479,7 +480,6 @@ export default {
 
     clearContent() {
       this.content = "";
-      localStorage.setItem("content", "");
     },
 
     removeFile(index) {
@@ -496,9 +496,11 @@ export default {
       console.log(this.lessonForm.files);
     },
 
-    previewImage() {
-      if (this.lessonForm.lessonImage !== null) {
-        this.url = URL.createObjectURL(this.lessonForm.lessonImage);
+    previewImage(e) {
+      if (e) {
+        this.url = URL.createObjectURL(e);
+      } else {
+        this.url = null;
       }
     },
 
@@ -557,6 +559,7 @@ export default {
 
       formData.append("filesId", filesId);
       formData.append("content", this.content);
+      formData.append("lessonId", this.$route.query.lessonId);
 
       this.$refs.observer.validate().then((result) => {
         if (result) {
@@ -583,11 +586,10 @@ export default {
 
           this.$http
             .post(
-              `${process.env.VUE_APP_API_PATH}/lesson/addLesson.php`,
+              `${process.env.VUE_APP_API_PATH}/lesson/updateLesson.php`,
               formData
             )
             .then((res) => {
-              localStorage.setItem("content", "");
               this.isLoading = false;
               console.log(res);
               if (res.data.isSuccess) {
@@ -595,7 +597,6 @@ export default {
               }
             })
             .catch((err) => {
-              localStorage.setItem("content", "");
               this.isLoading = false;
               console.log(err.response);
             });
@@ -610,18 +611,38 @@ export default {
     getAllSubject() {
       this.subjects = this.get("/subject/getAllActiveSubject.php");
     },
+
+    getLesson() {
+      let formData = new FormData();
+
+      formData.append("lessonId", this.$route.query.lessonId);
+
+      this.$http
+        .post(`${process.env.VUE_APP_API_PATH}/lesson/getLesson.php`, formData)
+        .then((res) => {
+          this.lessonForm.subjectId = res.data.lessonData[0].subjectId;
+          this.lessonForm.lessonName = res.data.lessonData[0].lessonName;
+          this.lessonForm.lessonImage = res.data.lessonData[0].lessonImage;
+          this.content = res.data.lessonData[0].content;
+
+          this.lessonForm.files = res.data.videoData;
+          console.log("res", res.data[0]);
+          console.log("lessonForm", this.lessonForm);
+        })
+        .catch((err) => {
+          this.isLoading = false;
+          console.log(err);
+        });
+    },
+
     async getVideoList() {
       this.videoList = await this.get("/lesson/getAllVideo.php");
     },
   },
   async created() {
-    this.content = localStorage.getItem("content");
     this.subjects = await this.get("/subject/getAllActiveSubject.php");
-    this.getVideoList();
-    setInterval(() => {
-      localStorage.setItem("content", this.content);
-      console.log("contentSave");
-    }, 30000);
+    await this.getVideoList();
+    await this.getLesson();
   },
 };
 </script>
