@@ -21,14 +21,30 @@
           :items="subjects"
           sort-by="username"
           class="elevation-1"
+          :search="search"
         >
           <template v-slot:top>
             <v-toolbar flat>
-              <v-toolbar-title>จัดการรายวิชา</v-toolbar-title>
+              <v-toolbar-title>จัดการหลักสูตร</v-toolbar-title>
               <v-divider class="mx-4" inset vertical></v-divider>
+              <v-text-field
+                v-model="search"
+                append-icon="mdi-magnify"
+                label="ค้นหาหลักสูตร"
+                single-line
+                hide-details
+              ></v-text-field>
               <v-spacer></v-spacer>
+              <v-btn
+                color="success"
+                dark
+                class="mr-3 mb-2"
+                :to="{ name: 'RegisterSubject' }"
+              >
+                ลงทะเบียน
+              </v-btn>
               <v-btn color="primary" dark class="mb-2" to="addsubject">
-                เพิ่มรายวิชา
+                เพิ่มหลักสูตร
               </v-btn>
             </v-toolbar>
           </template>
@@ -37,8 +53,8 @@
           </template>
 
           <template v-slot:item.teacher="{ item }">
-            <v-chip color="info" @click="watchTeacher(item)">
-              อาจารย์ที่ทำการสอน
+            <v-chip class="ml-3" color="info" @click="watchTeacher(item)">
+              <v-icon>mdi-card-search-outline</v-icon>
             </v-chip>
           </template>
 
@@ -54,10 +70,10 @@
           </template>
 
           <template v-slot:item.actions="{ item }">
-            <v-icon small class="mr-2" @click="editSubject(item)" color="info">
+            <v-icon class="mr-2" @click="editSubject(item)" color="info">
               mdi-pencil
             </v-icon>
-            <v-icon small @click="deleteSubject(item)" color="error">
+            <v-icon @click="deleteSubject(item)" color="error">
               mdi-delete
             </v-icon>
           </template>
@@ -99,6 +115,7 @@ import "@/mixins/generalMixin";
 export default {
   name: "ShowSubjects",
   data: () => ({
+    search: "",
     dialogm1: "",
     dialog: false,
     dialogDelete: false,
@@ -107,13 +124,9 @@ export default {
       {
         text: "หลักสูตร",
         align: "start",
-        value: "courseName",
-      },
-      {
-        text: "รายวิชา",
-        align: "start",
         value: "subjectName",
       },
+      { text: "จำนวนบทเรียน", value: "lessonAmount" },
       { text: "อาจารย์ที่ทำการสอน", value: "teacher" },
       { text: "การใช้งาน", value: "subjectSta" },
       { text: "แก้ไข/ลบ", value: "actions", sortable: false },
@@ -189,12 +202,11 @@ export default {
         })
         .catch((err) => {
           this.isLoading = false;
-          this.$swal({
-            icon: "error",
-            text: err.response.data.message,
-            confirmButtonText: "ตกลง",
-            allowOutSideClick: false,
+          this.$toast.open({
+            message: err.response.data.message,
+            type: "warning",
           });
+          this.initialize();
         });
     },
 

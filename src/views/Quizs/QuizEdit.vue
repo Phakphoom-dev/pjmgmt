@@ -4,30 +4,20 @@
       ><v-icon small class="mr-1">mdi-arrow-left</v-icon> ย้อนกลับ</v-btn
     >
     <v-card class="mt-3">
-      <v-card-title>
-        เพิ่มแบบฝึกหัด
-        <v-btn
-          :color="activeButton === 'choice' ? 'primary' : ''"
-          @click="activeButton = 'choice'"
-          class="ml-3"
-          ><v-icon small class="mr-1">mdi-text-box-check</v-icon>
-          แบบตัวเลือก</v-btn
-        >
-        <v-btn
-          :color="activeButton === 'text' ? 'primary' : ''"
-          @click="activeButton = 'text'"
-          class="ml-3"
-          ><v-icon small class="mr-1">mdi-file-document-edit-outline</v-icon>
-          แบบกรอกคำ</v-btn
-        >
-      </v-card-title>
-      <v-card-text v-if="activeButton === 'choice'">
+      <v-card-title> เพิ่มข้อสอบ</v-card-title>
+      <v-card-text>
         <validation-observer ref="observer">
           <v-form @submit.prevent="submit">
             <v-container>
               <v-row class="mb-3" align="center" justify="center">
                 <v-img
-                  v-if="url"
+                  v-if="!questionForm.newImg"
+                  :src="imgPath(questionForm.questionImg, 'quiz')"
+                  max-height="300"
+                  max-width="300"
+                ></v-img>
+                <v-img
+                  v-else
                   :src="url"
                   max-height="300"
                   max-width="300"
@@ -40,7 +30,7 @@
                     @change="onFileChange"
                     accept="image/*"
                     label="รูปแบบฝึกหัด"
-                    v-model="questionForm.questionImg"
+                    v-model="questionForm.newImg"
                     dense
                     outlined
                   ></v-file-input>
@@ -194,101 +184,6 @@
           </v-form>
         </validation-observer>
       </v-card-text>
-
-      <v-card-text v-if="activeButton === 'text'">
-        <validation-observer ref="observer">
-          <v-form @submit.prevent="textFormSubmit">
-            <v-container>
-              <v-row no-gutters>
-                <v-col cols="12">
-                  <validation-provider
-                    v-slot="{ errors }"
-                    name="หัวข้อ"
-                    rules="required"
-                  >
-                    <v-text-field
-                      type="text"
-                      prepend-icon="mdi-book-open"
-                      dense
-                      outlined
-                      maxlength="100"
-                      v-model="textQuestion"
-                      :error-messages="errors"
-                      label="ชื่อหัวข้อ"
-                      required
-                    ></v-text-field>
-                  </validation-provider>
-                </v-col>
-              </v-row>
-
-              <v-row no-gutters v-for="(form, index) in textForm" :key="index">
-                <v-col cols="6">
-                  <validation-provider
-                    v-slot="{ errors }"
-                    :name="`คำถามที่ ${index}`"
-                    rules="required"
-                  >
-                    <v-text-field
-                      type="text"
-                      prepend-icon="mdi-forum"
-                      dense
-                      outlined
-                      maxlength="100"
-                      v-model="form.question"
-                      :error-messages="errors"
-                      :label="`คำถามที่ ${index}`"
-                      required
-                    ></v-text-field>
-                  </validation-provider>
-                </v-col>
-                <v-col cols="6">
-                  <validation-provider
-                    v-slot="{ errors }"
-                    :name="`คำตอบที่ ${index}`"
-                    rules="required"
-                  >
-                    <v-text-field
-                      class="ml-2"
-                      type="text"
-                      prepend-icon="mdi-check-outline"
-                      dense
-                      outlined
-                      maxlength="100"
-                      v-model="form.textAnswer"
-                      :error-messages="errors"
-                      :label="`คำตอบที่ ${index}`"
-                      required
-                    >
-                      <template v-slot:append-outer>
-                        <v-btn
-                          v-if="index === textForm.length - 1"
-                          small
-                          outlined
-                          color="info"
-                          @click="addTextQuestion"
-                        >
-                          <v-icon color="info">mdi-plus-thick</v-icon>
-                        </v-btn>
-                      </template>
-                    </v-text-field>
-                  </validation-provider>
-                </v-col>
-              </v-row>
-            </v-container>
-            <v-col cols="12">
-              <v-btn
-                class="mr-4"
-                type="submit"
-                block
-                color="primary"
-                :disabled="isLoading"
-              >
-                ยืนยัน
-              </v-btn>
-            </v-col>
-          </v-form>
-        </validation-observer>
-      </v-card-text>
     </v-card>
   </v-container>
 </template>
@@ -316,17 +211,9 @@ export default {
     ValidationObserver,
   },
   data: () => ({
-    activeButton: "choice",
     isLoading: false,
     url: null,
     valid: true,
-    textQuestion: "",
-    textForm: [
-      {
-        question: "",
-        textAnswer: "",
-      },
-    ],
     questionForm: {
       question: "",
       a: "",
@@ -336,21 +223,10 @@ export default {
       answer: "",
       questionImg: null,
       lessonId: "",
-      subjectId: "",
+      newImg: null,
     },
   }),
   methods: {
-    addTextQuestion() {
-      this.textForm.push({
-        question: "",
-        textAnswer: "",
-      });
-    },
-
-    showTextQuiz(type) {
-      this.activeButton = type;
-    },
-
     onFileChange(e) {
       if (e) {
         this.url = URL.createObjectURL(e);
@@ -359,46 +235,11 @@ export default {
       }
     },
 
-    async textFormSubmit() {
-      const isValid = await this.$refs.observer.validate();
-
-      if (isValid) {
-        this.isLoading = true;
-
-        this.textForm.map((form, index) => {
-          this.textForm[index].subjectId = this.$route.query.subjectId;
-          this.textForm[index].lessonId = this.$route.query.lessonId;
-          this.textForm[index].textQuestion = this.textQuestion;
-        });
-
-        this.$http
-          .post(
-            `${process.env.VUE_APP_API_PATH}/quiz/addTextQuiz.php`,
-            JSON.stringify(this.textForm)
-          )
-          .then((res) => {
-            this.isLoading = false;
-            console.log(res.data);
-            this.$router.push({
-              name: "QuizList",
-              query: {
-                lessonId: this.questionForm.lessonId,
-                subjectId: this.$route.query.subjectId,
-              },
-            });
-          })
-          .catch((err) => {
-            this.isLoading;
-            console.log(err);
-          });
-      }
-    },
-
     async submit() {
+      this.isLoading = true;
       const isValid = await this.$refs.observer.validate();
 
       if (isValid) {
-        this.isLoading = true;
         let formData = new FormData();
 
         for (const key in this.questionForm) {
@@ -407,16 +248,13 @@ export default {
         }
 
         this.$http
-          .post(`${process.env.VUE_APP_API_PATH}/quiz/addQuiz.php`, formData)
+          .post(`${process.env.VUE_APP_API_PATH}/quiz/updateQuiz.php`, formData)
           .then((res) => {
             this.isLoading = false;
             console.log(res.data);
             this.$router.push({
               name: "QuizList",
-              query: {
-                lessonId: this.questionForm.lessonId,
-                subjectId: this.$route.query.subjectId,
-              },
+              query: { lessonId: this.questionForm.lessonId },
             });
           })
           .catch((err) => {
@@ -425,12 +263,29 @@ export default {
           });
       }
     },
+
+    getQuiz() {
+      this.isLoading = true;
+
+      const jsonData = JSON.stringify({ quizId: this.$route.query.quizId });
+
+      this.$http
+        .post(`${process.env.VUE_APP_API_PATH}/quiz/getQuiz.php`, jsonData)
+        .then((res) => {
+          this.isLoading = false;
+          this.questionForm = res.data[0];
+          console.log("questionForm", this.questionForm);
+        })
+        .catch((err) => {
+          this.isLoading = false;
+          console.log(err);
+        });
+    },
   },
 
   created() {
-    this.questionForm.lessonId = this.$route.query.lessonId;
-    this.questionForm.subjectId = this.$route.query.subjectId;
-    console.log("QuizAdd", this.$route.query);
+    this.getQuiz();
+    console.log("QuizEdit", this.$route.query);
   },
 };
 </script>

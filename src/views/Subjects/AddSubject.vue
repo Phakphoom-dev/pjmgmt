@@ -4,7 +4,7 @@
       ><v-icon small class="mr-1">mdi-arrow-left</v-icon> ย้อนกลับ</v-btn
     >
     <v-card class="mt-3">
-      <v-card-title>เพิ่มรายวิชา</v-card-title>
+      <v-card-title>เพิ่มหลักสูตร</v-card-title>
       <v-card-text>
         <validation-observer ref="observer">
           <v-form @submit.prevent="submit">
@@ -13,7 +13,7 @@
                 <v-col cols="12">
                   <validation-provider
                     v-slot="{ errors }"
-                    name="ชื่อหลักสูตร"
+                    name="ชื่อหลักสูตรหลัก"
                     rules="required"
                   >
                     <v-select
@@ -24,7 +24,7 @@
                       item-text="courseName"
                       v-model="subjectForm.courseId"
                       :error-messages="errors"
-                      label="ชื่อหลักสูตร"
+                      label="ชื่อหลักสูตรหลัก"
                       outlined
                     ></v-select>
                   </validation-provider>
@@ -35,7 +35,7 @@
                 <v-col cols="12">
                   <validation-provider
                     v-slot="{ errors }"
-                    name="ชื่อรายวิชา"
+                    name="ชื่อหลักสูตร"
                     rules="required"
                   >
                     <v-text-field
@@ -46,7 +46,7 @@
                       maxlength="100"
                       v-model="subjectForm.subjectName"
                       :error-messages="errors"
-                      label="ชื่อรายวิชา"
+                      label="ชื่อหลักสูตร"
                       required
                     ></v-text-field>
                   </validation-provider>
@@ -55,34 +55,166 @@
 
               <v-row no-gutters>
                 <v-col cols="12">
+                  <validation-provider
+                    v-slot="{ errors }"
+                    name="จำนวนบทเรียนทั้งหมด"
+                    rules="required"
+                  >
+                    <v-text-field
+                      type="number"
+                      prepend-icon="mdi-clock-time-nine"
+                      dense
+                      outlined
+                      maxlength="11"
+                      v-model="subjectForm.totalLesson"
+                      :error-messages="errors"
+                      label="จำนวนบทเรียนทั้งหมด"
+                      required
+                    ></v-text-field>
+                  </validation-provider>
+                </v-col>
+              </v-row>
+
+              <v-row no-gutters>
+                <v-col cols="12">
+                  <validation-provider
+                    v-slot="{ errors }"
+                    name="จำนวนชั่วโมงต่อบทเรียน"
+                    rules="required"
+                  >
+                    <v-text-field
+                      type="number"
+                      prepend-icon="mdi-clock-time-five"
+                      dense
+                      outlined
+                      maxlength="11"
+                      v-model="subjectForm.hourLesson"
+                      :error-messages="errors"
+                      label="จำนวนชั่วโมงต่อบทเรียน"
+                      required
+                    ></v-text-field>
+                  </validation-provider>
+                </v-col>
+              </v-row>
+
+              <v-row no-gutters>
+                <v-col cols="12">
+                  <validation-provider
+                    v-slot="{ errors }"
+                    name="จำนวนชั่วโมงเรียนทั้งหมด"
+                    rules="required"
+                  >
+                    <v-text-field
+                      type="number"
+                      prepend-icon="mdi-clock-time-one"
+                      dense
+                      outlined
+                      maxlength="11"
+                      v-model="subjectForm.totalHour"
+                      :error-messages="errors"
+                      label="จำนวนชั่วโมงเรียนทั้งหมด"
+                      required
+                    ></v-text-field>
+                  </validation-provider>
+                </v-col>
+              </v-row>
+
+              <v-row no-gutters>
+                <v-col cols="12">
+                  <v-text-field
+                    type="number"
+                    prepend-icon="mdi-cash"
+                    dense
+                    outlined
+                    maxlength="11"
+                    v-model="subjectForm.subjectPrice"
+                    label="ราคา"
+                    required
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+
+              <v-row class="mb-3" align="center" justify="center" no-gutters>
+                <v-img
+                  v-if="url"
+                  :src="url"
+                  max-height="300"
+                  max-width="300"
+                ></v-img>
+              </v-row>
+
+              <v-row no-gutters>
+                <v-col cols="12">
+                  <v-col cols="12">
+                    <validation-provider
+                      v-slot="{ errors }"
+                      name="รูปหลักสูตร"
+                      rules="required"
+                    >
+                      <v-file-input
+                        :error-messages="errors"
+                        @change="onFileChange"
+                        accept="image/*"
+                        label="รูปหลักสูตร"
+                        v-model="subjectForm.subjectImg"
+                        dense
+                        outlined
+                      ></v-file-input>
+                    </validation-provider>
+                  </v-col>
+                </v-col>
+              </v-row>
+
+              <v-row no-gutters>
+                <v-col cols="12">
                   <v-row>
                     <v-col cols="12">
-                      <validation-provider
-                        v-slot="{ errors }"
-                        name="อาจารย์ผู้สอน"
-                        rules="required"
-                      >
-                        <v-select
-                          dense
-                          prepend-icon="mdi-account"
-                          :items="teachers"
-                          item-value="teacherId"
-                          item-text="fullName"
-                          v-model="subjectForm.teacherList"
-                          label="อาจารย์ผู้สอน"
-                          :error-messages="errors"
-                          multiple
-                          chips
-                          persistent-hint
-                        ></v-select>
-                      </validation-provider>
+                      <v-select
+                        dense
+                        prepend-icon="mdi-account"
+                        :items="teachers"
+                        item-value="teacherId"
+                        item-text="fullName"
+                        v-model="subjectForm.teacherList"
+                        label="อาจารย์ผู้สอน"
+                        multiple
+                        outlined
+                        small-chips
+                        persistent-hint
+                      ></v-select>
                     </v-col>
                   </v-row>
                 </v-col>
               </v-row>
 
+              <v-row no-gutters>
+                <v-col cols="12">
+                  <validation-provider
+                    v-slot="{ errors }"
+                    name="รายละเอียดหลักสูตร"
+                    rules="required"
+                  >
+                    <v-textarea
+                      prepend-icon="mdi-text"
+                      dense
+                      outlined
+                      v-model="subjectForm.subjectDesc"
+                      :error-messages="errors"
+                      label="รายละเอียดหลักสูตร"
+                      required
+                    ></v-textarea>
+                  </validation-provider>
+                </v-col>
+              </v-row>
+
               <v-row>
-                <v-btn class="mr-4" type="submit" block color="primary">
+                <v-btn
+                  class="mr-4"
+                  type="submit"
+                  block
+                  color="primary"
+                  :disabled="isLoading"
+                >
                   ยืนยัน
                 </v-btn>
               </v-row>
@@ -118,11 +250,18 @@ export default {
     ValidationObserver,
   },
   data: () => ({
+    isLoading: false,
+    url: "",
     valid: true,
     subjectForm: {
       courseId: "",
       subjectName: "",
+      subjectDesc: "",
       teacherList: [],
+      subjectPrice: null,
+      totalLesson: null,
+      hourLesson: null,
+      totalHour: null,
     },
     coursesName: [],
     teachers: [],
@@ -133,6 +272,14 @@ export default {
     },
   },
   methods: {
+    onFileChange(e) {
+      if (e) {
+        this.url = URL.createObjectURL(e);
+      } else {
+        this.url = null;
+      }
+    },
+
     submit() {
       this.isLoading = true;
       this.$refs.observer.validate().then((result) => {

@@ -12,9 +12,10 @@ import Exams from "@/views/Exams/Exams.vue";
 import News from "@/views/News/News.vue";
 import Reports from "@/views/Reports/Reports.vue";
 import Students from "@/views/Students/Students.vue";
+import Videos from "@/views/Videos/Videos.vue";
+import Test from "@/views/Test/Test.vue";
 
 // Pages
-import About from "@/views/About.vue";
 import Error from "@/views/Error/Error.vue";
 import Login from "@/views/Login/Login.vue";
 import Dashboard from "@/views/Dashboard/Dashboard.vue";
@@ -28,15 +29,19 @@ import AddCourse from "@/views/Courses/AddCourse.vue";
 import EditCourse from "@/views/Courses/EditCourse.vue";
 import ShowTeachers from "@/views/Teachers/ShowTeachers.vue";
 import ShowSubjects from "@/views/Subjects/ShowSubjects.vue";
+import RegisterSubject from "@/views/Subjects/RegisterSubject.vue";
 import AddSubject from "@/views/Subjects/AddSubject.vue";
 import EditSubject from "@/views/Subjects/EditSubject.vue";
 import ShowLessons from "@/views/Lessons/ShowLessons.vue";
 import EditLesson from "@/views/Lessons/EditLesson.vue";
 import AddLesson from "@/views/Lessons/AddLesson.vue";
 import ShowQuizs from "@/views/Quizs/ShowQuizs.vue";
+import ShowTest from "@/views/Test/ShowTest.vue";
+import TestList from "@/views/Test/TestList.vue";
 import QuizLesson from "@/views/Quizs/QuizLesson.vue";
 import QuizList from "@/views/Quizs/QuizList.vue";
 import QuizAdd from "@/views/Quizs/QuizAdd.vue";
+import QuizEdit from "@/views/Quizs/QuizEdit.vue";
 import ShowExams from "@/views/Exams/ShowExams.vue";
 import ExamQuizs from "@/views/Exams/ExamQuizs.vue";
 import ShowNews from "@/views/News/ShowNews.vue";
@@ -45,8 +50,18 @@ import VisitReport from "@/views/Reports/VisitReport.vue";
 import QuizReport from "@/views/Reports/QuizReport.vue";
 import ExamReport from "@/views/Reports/ExamReport.vue";
 import ShowStudents from "@/views/Students/ShowStudents.vue";
+import StudentLog from "@/views/Students/StudentLog.vue";
 import AddStudent from "@/views/Students/AddStudent.vue";
 import EditStudent from "@/views/Students/EditStudent.vue";
+import ShowVideos from "@/views/Videos/ShowVideos.vue";
+import Contact from "@/views/Contact/Contact.vue";
+import About from "@/views/About/About.vue";
+import ShowSettings from "@/views/Settings/ShowSettings.vue";
+import Settings from "@/views/Settings/Settings.vue";
+import AddSlide from "@/views/Settings/AddSlide.vue";
+import EditSlide from "@/views/Settings/EditSlide.vue";
+import SuperSettings from "@/views/SuperSettings/SuperSettings.vue";
+import SuperSettingsIndex from "@/views/SuperSettings/SuperSettingsIndex.vue";
 
 Vue.use(VueRouter);
 
@@ -65,6 +80,29 @@ const routes = [
         path: "",
         name: "Dashboard",
         component: Dashboard,
+      },
+      {
+        path: "settings",
+        name: "Settings",
+        redirect: "settings/showsettings",
+        component: Settings,
+        children: [
+          {
+            path: "showsettings",
+            name: "ShowSettings",
+            component: ShowSettings,
+          },
+          {
+            path: "add-slide",
+            name: "AddSlide",
+            component: AddSlide,
+          },
+          {
+            path: "edit-slide",
+            name: "EditSlide",
+            component: EditSlide,
+          },
+        ],
       },
       {
         path: "users",
@@ -136,6 +174,16 @@ const routes = [
         ],
       },
       {
+        path: "contact",
+        name: "Contact",
+        component: Contact,
+      },
+      {
+        path: "about",
+        name: "About",
+        component: About,
+      },
+      {
         path: "subjects",
         name: "Subjects",
         component: Subjects,
@@ -155,6 +203,11 @@ const routes = [
             path: "edit-subject",
             name: "EditSubject",
             component: EditSubject,
+          },
+          {
+            path: "register-subject",
+            name: "RegisterSubject",
+            component: RegisterSubject,
           },
         ],
       },
@@ -178,6 +231,37 @@ const routes = [
             path: "edit-lesson",
             name: "EditLesson",
             component: EditLesson,
+          },
+        ],
+      },
+      {
+        path: "super-settings",
+        name: "SuperSettings",
+        component: SuperSettings,
+        redirect: "super-settings/index",
+        children: [
+          {
+            path: "index",
+            name: "SuperSettingsIndex",
+            component: SuperSettingsIndex,
+          },
+        ],
+      },
+      {
+        path: "test",
+        name: "Test",
+        component: Test,
+        redirect: "test/showtest",
+        children: [
+          {
+            path: "showtest",
+            name: "ShowTest",
+            component: ShowTest,
+          },
+          {
+            path: "test-list",
+            name: "TestList",
+            component: TestList,
           },
         ],
       },
@@ -206,6 +290,11 @@ const routes = [
             path: "quiz-add",
             name: "QuizAdd",
             component: QuizAdd,
+          },
+          {
+            path: "quiz-edit",
+            name: "QuizEdit",
+            component: QuizEdit,
           },
         ],
       },
@@ -288,6 +377,24 @@ const routes = [
             path: "edit-student",
             name: "EditStudent",
             component: EditStudent,
+          },
+          {
+            path: "student-log",
+            name: "StudentLog",
+            component: StudentLog,
+          },
+        ],
+      },
+      {
+        path: "videos",
+        name: "Videos",
+        component: Videos,
+        redirect: "videos/show-videos",
+        children: [
+          {
+            path: "show-videos",
+            name: "ShowVideos",
+            component: ShowVideos,
           },
         ],
       },

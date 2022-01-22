@@ -1,13 +1,13 @@
 <template>
   <v-container fluid class="mt-3">
     <v-row class="mt-2" no-gutters>
-      <h3>แบบฝึกหัด</h3>
+      <h3>จัดการแบบฝึกหัด {{ $route.query.lessonName }}</h3>
     </v-row>
 
     <!-- <v-row>
       <v-col>
-        <v-btn color="secondary" to="subjects">จัดการหลักสูตร</v-btn>
-        <v-btn color="primary" class="ml-2" to="subjects/subjects"
+        <v-btn color="secondary" to="courses">จัดการหลักสูตร</v-btn>
+        <v-btn color="primary" class="ml-2" to="courses/subjects"
           >จัดการรายวิชา</v-btn
         >
         <v-btn color="secondary" class="ml-2">จัดการบทเรียน</v-btn>
@@ -17,14 +17,20 @@
     <v-row class="mt-3">
       <v-col>
         <v-data-table
+          :loading="isLoading"
           :headers="headers"
-          :items="subjects"
-          sort-by="username"
+          :items="quizs"
+          sort-by="quizId"
           class="elevation-1"
         >
           <template v-slot:top>
             <v-toolbar flat>
-              <v-toolbar-title>จัดการแบบฝึกหัด</v-toolbar-title>
+              <v-toolbar-title>
+                <v-btn color="info" @click="$router.go(-1)" class="mr-2"
+                  ><v-icon small class="mr-1">mdi-arrow-left</v-icon>
+                  ย้อนกลับ</v-btn
+                ></v-toolbar-title
+              >
               <v-divider class="mx-4" inset vertical></v-divider>
               <v-spacer></v-spacer>
               <v-dialog v-model="dialog" max-width="500px">
@@ -68,14 +74,14 @@
               <v-dialog v-model="dialogDelete" max-width="500px">
                 <v-card>
                   <v-card-title class="text-h5"
-                    >ต้องการลบผู้สอนหรือไม่ ?</v-card-title
+                    >ต้องการลบคำถามนี้หรือไม่ ?</v-card-title
                   >
                   <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn color="blue darken-1" text @click="closeDelete"
                       >ยกเลิก</v-btn
                     >
-                    <v-btn color="blue darken-1" text @click="deleteItemConfirm"
+                    <v-btn color="blue darken-1" text @click="deleteQuizConfirm"
                       >ยืนยัน</v-btn
                     >
                     <v-spacer></v-spacer>
@@ -88,23 +94,23 @@
             {{ props.index + 1 }}
           </template>
 
-          <template v-slot:item.active="{ item }">
+          <template v-slot:item.isExam="{ item, index }">
             <div>
               <v-switch
-                v-model="item.active"
+                v-model="item.isExam"
                 color="success"
-                :error="!item.active"
                 dense
+                @change="changeQuizSta(item.isExam, item.quizId, index)"
               ></v-switch>
             </div>
           </template>
 
           <template v-slot:item.actions="{ item }">
-            <v-icon class="mr-2" @click="editItem(item)" color="info">
+            <v-icon small class="mr-2" @click="editQuiz(item)" color="info">
               mdi-pencil
             </v-icon>
           </template>
-          <template v-slot:no-data> ไม่พบหลักสูตร </template>
+          <template v-slot:no-data> ไม่พบแบบฝึกหัดของบทเรียนนี้ </template>
         </v-data-table>
       </v-col>
     </v-row>
@@ -113,17 +119,18 @@
 
 <script>
 export default {
-  name: "ShowQuizs",
+  name: "TestList",
   data: () => ({
+    isLoading: false,
+    quizs: [],
     dialog: false,
     dialogDelete: false,
     headers: [
       { text: "ลำดับที่", value: "index" },
-      { text: "รายวิชา", value: "subjectName" },
-      { text: "จำนวนบทเรียน", value: "lessonAmount" },
-      { text: "จัดการ", value: "actions", sortable: false },
+      { text: "คำถาม", value: "question" },
+      { text: "แก้ไข/ลบ", value: "actions", sortable: false },
     ],
-    subjects: [],
+    courses: [],
     editedIndex: -1,
     editedItem: {
       subjectName: "",
@@ -151,30 +158,109 @@ export default {
   },
 
   methods: {
-    async getData() {
-      this.subjects = await this.get("/subject/getAllSubject.php");
-      console.log(this.subjects);
+    changeQuizSta(isExam, quizId, index) {
+      let quizStatus = null;
+      isExam ? (quizStatus = 1) : (quizStatus = 0);
+
+      let formData = new FormData();
+      formData.append("isExam", quizStatus);
+      formData.append("quizId", quizId);
+
+      this.$http
+        .post(
+          `${process.env.VUE_APP_API_PATH}/quiz/updateQuizSta.php`,
+          formData
+        )
+        .then((res) => {
+          if (res.status === 200) {
+            console.log("Success");
+          }
+        })
+        .catch((err) => {
+          this.isLoading = false;
+          this.$toast.open({
+            message: err.response.data.message,
+            type: "warning",
+            position: "top-right",
+          });
+          this.getAllCourse();
+        });
     },
 
-    editItem(item) {
-      console.log(item);
+    addQuiz() {
       this.$router.push({
-        name: "QuizLesson",
+        name: "QuizAdd",
         query: {
-          subjectId: item.subjectId,
-          subjectName: item.subjectName,
+          lessonId: this.$route.query.lessonId,
+          subjectId: this.$route.query.subjectId,
         },
       });
     },
 
-    deleteItem(item) {
-      this.editedIndex = this.subjects.indexOf(item);
-      this.editedItem = Object.assign({}, item);
-      this.dialogDelete = true;
+    getData() {
+      this.subjectId = this.$route.query.subjectId;
+
+      const jsonData = JSON.stringify({
+        subjectId: this.$route.query.subjectId,
+      });
+
+      const data = this.post("/quiz/getTestQuiz.php", jsonData);
+      data.then((res) => {
+        this.quizs = res.data;
+        console.log("quiz", this.quizs);
+      });
     },
 
-    deleteItemConfirm() {
-      this.subjects.splice(this.editedIndex, 1);
+    editQuiz(item) {
+      this.$router.push({
+        name: "QuizEdit",
+        query: { quizId: item.quizId },
+      });
+    },
+
+    deleteQuiz(quiz) {
+      this.$swal
+        .fire({
+          title: `ต้องการลบแบบทดสอบหรือไม่หรือไม่`,
+          showDenyButton: true,
+          confirmButtonText: "ยืนยัน",
+          denyButtonText: `ยกเลิก`,
+        })
+        .then((result) => {
+          if (result.isConfirmed) {
+            const jsonData = JSON.stringify({
+              quizId: quiz.quizId,
+              questionImg: quiz.questionImg,
+              lessonId: quiz.lessonId,
+            });
+
+            this.$http
+              .post(
+                `${process.env.VUE_APP_API_PATH}/quiz/deleteQuiz.php`,
+                jsonData
+              )
+              .then((res) => {
+                if (res.status === 200) {
+                  this.getData();
+                }
+              })
+              .catch((err) => {
+                this.isLoading = false;
+                this.$swal({
+                  icon: "error",
+                  text: err.response.data.message,
+                  confirmButtonText: "ตกลง",
+                  allowOutSideClick: false,
+                });
+              });
+          } else if (result.isDenied) {
+            return;
+          }
+        });
+    },
+
+    deleteQuizConfirm() {
+      this.courses.splice(this.editedIndex, 1);
       this.closeDelete();
     },
 
@@ -196,9 +282,9 @@ export default {
 
     save() {
       if (this.editedIndex > -1) {
-        Object.assign(this.subjects[this.editedIndex], this.editedItem);
+        Object.assign(this.courses[this.editedIndex], this.editedItem);
       } else {
-        this.subjects.push(this.editedItem);
+        this.courses.push(this.editedItem);
       }
       this.close();
     },

@@ -4,6 +4,6 @@
 
 <script>
 export default {
-  name: "Courses",
+  name: "SuperSettings",
 };
 </script>

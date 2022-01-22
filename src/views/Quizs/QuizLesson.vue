@@ -1,13 +1,13 @@
 <template>
   <v-container fluid class="mt-3">
     <v-row class="mt-2" no-gutters>
-      <h3>รายวิชา {{ quiz.subjectName }}</h3>
+      <h3>บทเรียนของหลักสูตร {{ subjectName }}</h3>
     </v-row>
 
     <!-- <v-row>
       <v-col>
-        <v-btn color="secondary" to="courses">จัดการหลักสูตร</v-btn>
-        <v-btn color="primary" class="ml-2" to="courses/subjects"
+        <v-btn color="secondary" to="lessons">จัดการหลักสูตร</v-btn>
+        <v-btn color="primary" class="ml-2" to="lessons/subjects"
           >จัดการรายวิชา</v-btn
         >
         <v-btn color="secondary" class="ml-2">จัดการบทเรียน</v-btn>
@@ -18,14 +18,14 @@
       <v-col>
         <v-data-table
           :headers="headers"
-          :items="courses"
+          :items="lessons"
           sort-by="username"
           class="elevation-1"
         >
           <template v-slot:top>
             <v-toolbar flat>
               <v-toolbar-title>
-                <v-btn color="info" @click="$router.push(-1)" class="mr-2"
+                <v-btn color="info" @click="$router.go(-1)" class="mr-2"
                   ><v-icon small class="mr-1">mdi-arrow-left</v-icon>
                   ย้อนกลับ</v-btn
                 ></v-toolbar-title
@@ -109,7 +109,7 @@
               mdi-pencil
             </v-icon>
           </template>
-          <template v-slot:no-data> ไม่พบผู้สอน </template>
+          <template v-slot:no-data> ไม่พบบทเรียนของหลักสูตรนี้ </template>
         </v-data-table>
       </v-col>
     </v-row>
@@ -120,16 +120,17 @@
 export default {
   name: "QuizLesson",
   data: () => ({
+    subjectName: "",
     quiz: [],
     dialog: false,
     dialogDelete: false,
     headers: [
       { text: "ลำดับที่", value: "index" },
       { text: "ชื่อบทเรียน", value: "lessonName" },
-      { text: "จำนวนข้อ", value: "amount" },
-      { text: "จัดการ", value: "actions", sortable: false },
+      { text: "จำนวนข้อ", value: "quizAmount" },
+      { text: "จัดการแบบฝึกหัด", value: "actions", sortable: false },
     ],
-    courses: [],
+    lessons: [],
     editedIndex: -1,
     editedItem: {
       subjectName: "",
@@ -156,45 +157,29 @@ export default {
     },
   },
 
-  created() {
-    this.initialize();
-  },
-
   methods: {
-    initialize() {
-      this.quiz = this.$route.params.quiz;
-
-      this.courses = [
-        {
-          lessonName: "บทที่ 1 Basic Grammar",
-          amount: 0,
-        },
-      ];
-
-      console.log(this.quiz);
-    },
-
     editItem(item) {
-      console.log(item);
       this.$router.push({
         name: "QuizList",
-        params: {
-          quiz: item,
+        query: {
+          lessonId: item.lessonId,
+          subjectId: item.subjectId,
+          lessonName: item.lessonName,
         },
       });
-      // this.editedIndex = this.courses.indexOf(item);
+      // this.editedIndex = this.lessons.indexOf(item);
       // this.editedItem = Object.assign({}, item);
       // this.dialog = true;
     },
 
     deleteItem(item) {
-      this.editedIndex = this.courses.indexOf(item);
+      this.editedIndex = this.lessons.indexOf(item);
       this.editedItem = Object.assign({}, item);
       this.dialogDelete = true;
     },
 
     deleteItemConfirm() {
-      this.courses.splice(this.editedIndex, 1);
+      this.lessons.splice(this.editedIndex, 1);
       this.closeDelete();
     },
 
@@ -216,12 +201,31 @@ export default {
 
     save() {
       if (this.editedIndex > -1) {
-        Object.assign(this.courses[this.editedIndex], this.editedItem);
+        Object.assign(this.lessons[this.editedIndex], this.editedItem);
       } else {
-        this.courses.push(this.editedItem);
+        this.lessons.push(this.editedItem);
       }
       this.close();
     },
+
+    getData() {
+      this.subjectName = this.$route.query.subjectName;
+
+      const jsonData = JSON.stringify({
+        subjectId: this.$route.query.subjectId,
+      });
+
+      const data = this.post("/quiz/getLessonBySubject.php", jsonData);
+      data.then((res) => {
+        this.lessons = res.data;
+        console.log("lessons", this.lessons);
+      });
+    },
+  },
+
+  created() {
+    console.log("QuizLesson", this.$route.query);
+    this.getData();
   },
 };
 </script>

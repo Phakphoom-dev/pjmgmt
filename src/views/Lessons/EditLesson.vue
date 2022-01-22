@@ -13,10 +13,10 @@
                 <v-col cols="12">
                   <validation-provider
                     v-slot="{ errors }"
-                    name="รายวิชา"
+                    name="หลักสูตร"
                     rules="required"
                   >
-                    <v-select
+                    <v-autocomplete
                       dense
                       prepend-icon="mdi-book-open"
                       :items="subjects"
@@ -24,9 +24,9 @@
                       item-value="subjectId"
                       v-model="lessonForm.subjectId"
                       :error-messages="errors"
-                      label="รายวิชา"
+                      label="หลักสูตร"
                       outlined
-                    ></v-select>
+                    ></v-autocomplete>
                   </validation-provider>
                 </v-col>
               </v-row>
@@ -84,64 +84,32 @@
                 </v-col>
               </v-row>
 
-              <v-row class="mb-2" no-gutters>
+              <v-row no-gutters>
                 <v-col cols="12">
-                  <h6>วิดีโอการสอน</h6>
-                </v-col>
-                <v-col>
-                  <v-btn
-                    color="primary"
-                    @click="showUploadInput = !showUploadInput"
-                    >เพิ่มวิดีโอการสอน</v-btn
-                  >
-                  <v-btn
-                    class="ml-3"
-                    color="success"
-                    @click="showVideoModal = !showVideoModal"
-                    >เลือกวิดีโอการสอน</v-btn
-                  >
-                  <v-btn
-                    class="ml-3"
-                    color="error"
-                    @click="showDelModal = !showDelModal"
-                    >ลบวิดีโอการสอน</v-btn
-                  >
-                </v-col>
-              </v-row>
-
-              <v-row no-gutters v-if="!isUpload && showUploadInput">
-                <v-col :cols="lessonVideo ? 8 : 12">
-                  <v-file-input
-                    @change="checkFileSize"
-                    v-model="lessonVideo"
-                    accept="video/*"
-                    label="วิดีโอการสอน"
-                    :rules="rules"
-                    truncate-length="50"
-                    prepend-icon="mdi-record"
-                  ></v-file-input>
-                </v-col>
-                <v-col cols="4" v-if="lessonVideo">
-                  <v-btn class="ml-4 mt-3" color="primary" @click="uploadVideo"
-                    >อัพโหลดวิดีโอการสอน</v-btn
-                  >
-                </v-col>
-              </v-row>
-
-              <v-row v-if="lessonForm.files.length > 0" class="mb-2">
-                <v-col
-                  cols="12"
-                  v-for="(video, index) in lessonForm.files"
-                  :key="video.videoId"
-                >
-                  <v-chip
-                    color="green"
-                    close
+                  <v-autocomplete
+                    prepend-icon="mdi-camera"
+                    v-model="lessonForm.filesId"
+                    :items="videoList"
+                    item-text="videoName"
+                    item-value="videoId"
                     outlined
-                    @click:close="removeSelected(video, index)"
+                    dense
+                    chips
+                    small-chips
+                    label="วิดีโอประกอบบทเรียน"
+                    multiple
                   >
-                    {{ index + 1 }}. {{ video.videoName }}
-                  </v-chip>
+                    <template v-slot:selection="data">
+                      <v-chip
+                        small
+                        color="info"
+                        close
+                        @click:close="remove(data.item)"
+                      >
+                        {{ data.item.videoName }}
+                      </v-chip>
+                    </template>
+                  </v-autocomplete>
                 </v-col>
               </v-row>
 
@@ -156,6 +124,11 @@
                   <strong>{{ Math.ceil(value) }}%</strong>
                 </template>
               </v-progress-linear>
+
+              <MultipleUploadInput
+                :fileList="files"
+                @fileChange="fileChange"
+              ></MultipleUploadInput>
 
               <v-row no-gutters class="mb-5">
                 <v-col cols="12">
@@ -225,108 +198,14 @@
         </validation-observer>
       </v-card-text>
     </v-card>
-
-    <!-- ShowVideoModal -->
-    <v-dialog
-      v-model="showVideoModal"
-      fullscreen
-      hide-overlay
-      transition="dialog-bottom-transition"
-    >
-      <v-card>
-        <v-toolbar dark color="success">
-          <v-btn icon dark @click="closeModal">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-          <v-toolbar-title>เลือกวิดีโอการสอน</v-toolbar-title>
-          <v-spacer></v-spacer>
-        </v-toolbar>
-        <v-list two-line>
-          <v-list-item-group
-            v-model="selectedFiles"
-            active-class="success--text"
-            multiple
-          >
-            <template v-for="(item, index) in videoList">
-              <v-list-item :key="item.videoId">
-                <template v-slot:default="{ active }">
-                  <v-list-item-content>
-                    <v-list-item-title
-                      v-text="item.videoName"
-                    ></v-list-item-title>
-                  </v-list-item-content>
-
-                  <v-list-item-action>
-                    <!-- <v-list-item-action-text> 2 hr </v-list-item-action-text> -->
-
-                    <v-icon v-if="!active" color="grey lighten-1">
-                      mdi-checkbox-blank-outline
-                    </v-icon>
-
-                    <v-icon v-else color="primary"> mdi-minus-box </v-icon>
-                  </v-list-item-action>
-                </template>
-              </v-list-item>
-
-              <v-divider
-                v-if="index < videoList.length - 1"
-                :key="item.videoName"
-              ></v-divider>
-            </template>
-          </v-list-item-group>
-        </v-list>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="submitVideo"> ตกลง </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <!-- DeleteModal -->
-    <v-dialog
-      persistent
-      v-model="showDelModal"
-      fullscreen
-      hide-overlay
-      transition="dialog-bottom-transition"
-    >
-      <v-card>
-        <v-toolbar dark color="error">
-          <v-btn icon dark @click="closeDelModal">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-          <v-toolbar-title>ลบวิดีโอการสอน</v-toolbar-title>
-          <v-spacer></v-spacer>
-        </v-toolbar>
-        <v-list two-line>
-          <v-list-item-group active-class="white">
-            <template v-for="(item, index) in videoList">
-              <v-list-item
-                :key="item.videoId"
-                @click="confirmDelete(item, index)"
-              >
-                <v-list-item-content>
-                  <v-list-item-title
-                    v-text="item.videoName"
-                  ></v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-
-              <v-divider
-                v-if="index < videoList.length - 1"
-                :key="item.videoName"
-              ></v-divider>
-            </template>
-          </v-list-item-group>
-        </v-list>
-      </v-card>
-    </v-dialog>
   </v-container>
 </template>
 
 <script>
 import "@/mixins/generalMixin";
 import LessonQuill from "@/components/Editor/LessonQuill";
+import MultipleUploadInput from "@/components/MultipleUploadInput";
+
 import {
   extend,
   ValidationObserver,
@@ -349,6 +228,7 @@ export default {
     ValidationProvider,
     ValidationObserver,
     LessonQuill,
+    MultipleUploadInput,
     // pdf,
   },
   data: () => ({
@@ -370,9 +250,10 @@ export default {
       subjectId: "",
       lessonName: "",
       lessonImage: null,
-      files: [],
+      filesId: [],
       newImage: null,
     },
+    files: [],
     lessonVideo: null,
     subjects: [],
     showVideoModal: false,
@@ -383,6 +264,11 @@ export default {
   }),
 
   methods: {
+    fileChange(files) {
+      this.files = files;
+      console.log("files", this.files);
+    },
+
     confirmDelete(video, index) {
       console.log(video, index);
       this.$swal
@@ -428,16 +314,6 @@ export default {
         });
     },
 
-    removeSelected(video, index) {
-      this.lessonForm.files = this.lessonForm.files.filter((e) => {
-        return video.videoId !== e.videoId;
-      });
-
-      console.log(this.selectedFiles);
-
-      this.selectedFiles.splice(index, 1);
-    },
-
     submitVideo() {
       console.log("videoList", this.videoList);
       console.log("selectedFiles", this.selectedFiles);
@@ -448,26 +324,6 @@ export default {
 
       console.log("lessonFiles", this.lessonForm.files);
       this.showVideoModal = false;
-    },
-
-    closeModal() {
-      console.log("videoList", this.videoList);
-      console.log("selectedFiles", this.selectedFiles);
-
-      this.lessonForm.files = this.selectedFiles.map((file) => {
-        return this.videoList[file];
-      });
-
-      console.log(this.lessonForm.files);
-      this.showVideoModal = false;
-    },
-
-    closeDelModal() {
-      this.showDelModal = false;
-    },
-
-    test(e) {
-      console.log("click", e);
     },
 
     checkFileSize() {
@@ -482,8 +338,10 @@ export default {
       this.content = "";
     },
 
-    removeFile(index) {
-      this.lessonForm.files.splice(index, 1);
+    remove(item) {
+      this.lessonForm.filesId = this.lessonForm.filesId.filter((lesson) => {
+        return lesson !== item.videoId;
+      });
     },
 
     openFile(file) {
@@ -546,33 +404,33 @@ export default {
     submit() {
       console.log("lessonForm", this.lessonForm);
       let formData = new FormData();
-      let filesId = [];
-
-      filesId = this.lessonForm.files.map((file) => {
-        return file.videoId;
-      });
 
       for (const key in this.lessonForm) {
         formData.append(key, this.lessonForm[key]);
         console.log(this.lessonForm[key]);
       }
 
-      formData.append("filesId", filesId);
       formData.append("content", this.content);
       formData.append("lessonId", this.$route.query.lessonId);
 
+      let oldFiles = [];
+
+      let newFiles = this.files.filter((file) => {
+        if (file.lastModified) {
+          return file;
+        } else {
+          oldFiles.push(file.fileId);
+        }
+      });
+
+      for (const i of Object.keys(newFiles)) {
+        formData.append("files[]", newFiles[i]);
+      }
+
+      formData.append("oldFiles", oldFiles);
+
       this.$refs.observer.validate().then((result) => {
         if (result) {
-          console.log(this.lessonForm.files.length);
-          if (this.lessonForm.files.length <= 0) {
-            this.$swal.fire({
-              icon: "info",
-              title: "กรุณาเลือกวิดีโอการสอน",
-              confirmButtonText: "ตกลง",
-            });
-            return;
-          }
-
           if (this.content === "") {
             this.$swal.fire({
               icon: "info",
@@ -625,8 +483,14 @@ export default {
           this.lessonForm.lessonImage = res.data.lessonData[0].lessonImage;
           this.content = res.data.lessonData[0].content;
 
-          this.lessonForm.files = res.data.videoData;
-          console.log("res", res.data[0]);
+          this.lessonForm.filesId = res.data.videoData;
+          this.lessonForm.filesId = this.lessonForm.filesId.map(
+            (lesson) => lesson.videoId
+          );
+
+          this.files = res.data.filesData;
+
+          console.log("res", res.lessonData);
           console.log("lessonForm", this.lessonForm);
         })
         .catch((err) => {
@@ -640,7 +504,7 @@ export default {
     },
   },
   async created() {
-    this.subjects = await this.get("/subject/getAllActiveSubject.php");
+    this.subjects = await this.get("/subject/getAllSubject.php");
     await this.getVideoList();
     await this.getLesson();
   },

@@ -42,7 +42,6 @@
                                 :rules="passRules"
                                 type="password"
                                 label="Password"
-                                hint="At least 6 characters"
                                 required
                               ></v-text-field>
                             </v-col>
@@ -103,9 +102,9 @@ export default {
   data() {
     return {
       isLoading: false,
-      username: "superadmin",
+      username: "",
       usernameRules: [(v) => !!v || "Username is required"],
-      password: "super5678",
+      password: "",
       passRules: [(v) => !!v || "Password is required"],
     };
   },
@@ -125,6 +124,7 @@ export default {
         })
         .catch((err) => {
           this.isLoading = false;
+          localStorage.setItem("userData", null);
           localStorage.setItem("isLogin", false);
           this.$swal({
             icon: "error",
@@ -132,6 +132,7 @@ export default {
             confirmButtonText: "ตกลง",
             allowOutSideClick: false,
           });
+          return;
         });
     },
   },

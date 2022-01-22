@@ -5,7 +5,7 @@
     >
     <Loading v-if="onLoad" />
     <v-card class="mt-3" v-else>
-      <v-card-title>แก้ไขรายวิชา</v-card-title>
+      <v-card-title>แก้ไขหลักสูตร</v-card-title>
       <v-card-text>
         <validation-observer ref="observer">
           <v-form @submit.prevent="submit">
@@ -14,7 +14,7 @@
                 <v-col cols="12">
                   <validation-provider
                     v-slot="{ errors }"
-                    name="ชื่อหลักสูตร"
+                    name="ชื่อหลักสูตรหลัก"
                     rules="required"
                   >
                     <v-select
@@ -25,7 +25,7 @@
                       item-text="courseName"
                       v-model="subjectForm.courseId"
                       :error-messages="errors"
-                      label="ชื่อหลักสูตร"
+                      label="ชื่อหลักสูตรหลัก"
                       outlined
                     ></v-select>
                   </validation-provider>
@@ -36,7 +36,7 @@
                 <v-col cols="12">
                   <validation-provider
                     v-slot="{ errors }"
-                    name="ชื่อรายวิชา"
+                    name="ชื่อหลักสูตร"
                     rules="required"
                   >
                     <v-text-field
@@ -47,10 +47,126 @@
                       maxlength="100"
                       v-model="subjectForm.subjectName"
                       :error-messages="errors"
-                      label="ชื่อรายวิชา"
+                      label="ชื่อหลักสูตร"
                       required
                     ></v-text-field>
                   </validation-provider>
+                </v-col>
+              </v-row>
+
+              <v-row no-gutters>
+                <v-col cols="12">
+                  <validation-provider
+                    v-slot="{ errors }"
+                    name="จำนวนบทเรียนทั้งหมด"
+                    rules="required"
+                  >
+                    <v-text-field
+                      type="number"
+                      prepend-icon="mdi-clock-time-nine"
+                      dense
+                      outlined
+                      maxlength="11"
+                      v-model="subjectForm.totalLesson"
+                      :error-messages="errors"
+                      label="จำนวนบทเรียนทั้งหมด"
+                      required
+                    ></v-text-field>
+                  </validation-provider>
+                </v-col>
+              </v-row>
+
+              <v-row no-gutters>
+                <v-col cols="12">
+                  <validation-provider
+                    v-slot="{ errors }"
+                    name="จำนวนชั่วโมงต่อบทเรียน"
+                    rules="required"
+                  >
+                    <v-text-field
+                      type="number"
+                      prepend-icon="mdi-clock-time-five"
+                      dense
+                      outlined
+                      maxlength="11"
+                      v-model="subjectForm.hourLesson"
+                      :error-messages="errors"
+                      label="จำนวนชั่วโมงต่อบทเรียน"
+                      required
+                    ></v-text-field>
+                  </validation-provider>
+                </v-col>
+              </v-row>
+
+              <v-row no-gutters>
+                <v-col cols="12">
+                  <validation-provider
+                    v-slot="{ errors }"
+                    name="จำนวนชั่วโมงเรียนทั้งหมด"
+                    rules="required"
+                  >
+                    <v-text-field
+                      type="number"
+                      prepend-icon="mdi-clock-time-one"
+                      dense
+                      outlined
+                      maxlength="11"
+                      v-model="subjectForm.totalHour"
+                      :error-messages="errors"
+                      label="จำนวนชั่วโมงเรียนทั้งหมด"
+                      required
+                    ></v-text-field>
+                  </validation-provider>
+                </v-col>
+              </v-row>
+
+              <v-row no-gutters>
+                <v-col cols="12">
+                  <validation-provider
+                    v-slot="{ errors }"
+                    name="ราคา"
+                    rules="required"
+                  >
+                    <v-text-field
+                      type="number"
+                      prepend-icon="mdi-cash"
+                      dense
+                      outlined
+                      maxlength="11"
+                      v-model="subjectForm.subjectPrice"
+                      :error-messages="errors"
+                      label="ราคา"
+                      required
+                    ></v-text-field>
+                  </validation-provider>
+                </v-col>
+              </v-row>
+
+              <v-row class="mb-3" align="center" justify="center">
+                <v-img
+                  v-if="!subjectForm.newImg"
+                  :src="imgPath(subjectForm.subjectImg, 'subject')"
+                  max-height="300"
+                  max-width="300"
+                ></v-img>
+                <v-img
+                  v-else
+                  :src="url"
+                  max-height="300"
+                  max-width="300"
+                ></v-img>
+              </v-row>
+
+              <v-row no-gutters>
+                <v-col cols="12">
+                  <v-file-input
+                    @change="onFileChange"
+                    accept="image/*"
+                    label="รูปหลักสูตร"
+                    v-model="subjectForm.newImg"
+                    dense
+                    outlined
+                  ></v-file-input>
                 </v-col>
               </v-row>
 
@@ -73,12 +189,33 @@
                           label="อาจารย์ผู้สอน"
                           :error-messages="errors"
                           multiple
-                          chips
+                          outlined
+                          small-chips
                           persistent-hint
                         ></v-select>
                       </validation-provider>
                     </v-col>
                   </v-row>
+                </v-col>
+              </v-row>
+
+              <v-row no-gutters>
+                <v-col cols="12">
+                  <validation-provider
+                    v-slot="{ errors }"
+                    name="รายละเอียดหลักสูตร"
+                    rules="required"
+                  >
+                    <v-textarea
+                      prepend-icon="mdi-text"
+                      dense
+                      outlined
+                      v-model="subjectForm.subjectDesc"
+                      :error-messages="errors"
+                      label="รายละเอียดหลักสูตร"
+                      required
+                    ></v-textarea>
+                  </validation-provider>
                 </v-col>
               </v-row>
 
@@ -122,12 +259,20 @@ export default {
     Loading,
   },
   data: () => ({
+    url: "",
     onLoad: false,
     valid: true,
     subjectForm: {
       courseId: "",
       subjectName: "",
       teacherList: [],
+      subjectImg: "",
+      subjectPrice: null,
+      totalLesson: null,
+      hourLesson: null,
+      totalHour: null,
+      newImg: null,
+      subjectDesc: null,
     },
     coursesName: [],
     teachers: [],
@@ -138,6 +283,14 @@ export default {
     },
   },
   methods: {
+    onFileChange(e) {
+      if (e) {
+        this.url = URL.createObjectURL(e);
+      } else {
+        this.url = null;
+      }
+    },
+
     submit() {
       this.isLoading = true;
       this.$refs.observer.validate().then((result) => {
@@ -169,6 +322,12 @@ export default {
       data.then((res) => {
         this.subjectForm.subjectName = res.data[0].subjectName;
         this.subjectForm.courseId = res.data[0].courseId;
+        this.subjectForm.subjectImg = res.data[0].subjectImg;
+        this.subjectForm.subjectPrice = res.data[0].subjectPrice;
+        this.subjectForm.totalLesson = res.data[0].totalLesson;
+        this.subjectForm.hourLesson = res.data[0].hourLesson;
+        this.subjectForm.totalHour = res.data[0].totalHour;
+        this.subjectForm.subjectDesc = res.data[0].subjectDesc;
         console.log(this.subjectForm);
       });
     },

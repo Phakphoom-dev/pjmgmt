@@ -14,14 +14,21 @@ import moment from "moment-timezone";
 import VueToast from "vue-toast-notification";
 import "vue-toast-notification/dist/theme-sugar.css";
 import VueQuillEditor from "vue-quill-editor";
-
+import vueDebounce from "vue-debounce";
 import "quill/dist/quill.core.css";
 import "quill/dist/quill.snow.css";
 import "quill/dist/quill.bubble.css";
 
 Vue.use(VueQuillEditor /* { default global options } */);
+Vue.use(vueDebounce);
+
+Vue.use(vueDebounce, {
+  listenTo: ["input", "change"],
+});
 
 moment.tz.setDefault("Asia/Jakarta");
+moment.locale("th");
+
 Vue.use(VueToast, {
   position: "top-right",
 });

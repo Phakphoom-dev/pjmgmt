@@ -8,11 +8,19 @@
           :items="teachers"
           sort-by="username"
           class="elevation-1"
+          :search="search"
         >
           <template v-slot:top>
             <v-toolbar flat>
               <v-toolbar-title>จัดการผู้สอน</v-toolbar-title>
               <v-divider class="mx-4" inset vertical></v-divider>
+              <v-text-field
+                v-model="search"
+                append-icon="mdi-magnify"
+                label="ค้นหาผู้สอน"
+                single-line
+                hide-details
+              ></v-text-field>
               <v-spacer></v-spacer>
               <v-btn color="primary" dark class="mb-2" to="addteacher">
                 เพิ่มผู้สอน
@@ -35,10 +43,10 @@
           </template>
 
           <template v-slot:item.actions="{ item }">
-            <v-icon small class="mr-2" @click="editUser(item)" color="info">
+            <v-icon class="mr-2" @click="editUser(item)" color="info">
               mdi-pencil
             </v-icon>
-            <v-icon small @click="deleteUser(item)" color="error">
+            <v-icon @click="deleteUser(item)" color="error">
               mdi-delete
             </v-icon>
           </template>
@@ -53,6 +61,7 @@
 export default {
   name: "ShowTeachers",
   data: () => ({
+    search: "",
     headers: [
       { text: "ลำดับที่", value: "index" },
       {

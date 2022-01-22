@@ -4,7 +4,7 @@
       ><v-icon small class="mr-1">mdi-arrow-left</v-icon> ย้อนกลับ</v-btn
     >
     <v-card class="mt-3">
-      <v-card-title> เพิ่มนักเรียน</v-card-title>
+      <v-card-title> เพิ่มผู้เรียน</v-card-title>
       <v-card-text>
         <validation-observer ref="observer">
           <v-form @submit.prevent="submit">
@@ -74,16 +74,16 @@
                 </v-col>
               </v-row>
 
-              <v-row class="mb-3" align="center" justify="center">
+              <!-- <v-row class="mb-3" align="center" justify="center">
                 <v-img
                   v-if="url"
                   :src="url"
                   max-height="300"
                   max-width="300"
                 ></v-img>
-              </v-row>
+              </v-row> -->
 
-              <v-row no-gutters>
+              <!-- <v-row no-gutters>
                 <v-col cols="12">
                   <validation-provider
                     v-slot="{ errors }"
@@ -101,7 +101,7 @@
                     ></v-file-input>
                   </validation-provider>
                 </v-col>
-              </v-row>
+              </v-row> -->
 
               <v-row no-gutters>
                 <v-col cols="12" lg="4" xs="12">
@@ -191,14 +191,14 @@
                   <validation-provider
                     v-slot="{ errors }"
                     name="อีเมล"
-                    rules="required"
+                    rules="required|email"
                   >
                     <v-text-field
                       type="text"
-                      prepend-icon="mdi-account-box-multiple"
+                      prepend-icon="mdi-email"
                       dense
                       outlined
-                      maxlength="20"
+                      maxlength="100"
                       v-model="userForm.email"
                       :error-messages="errors"
                       label="อีเมล"
@@ -218,7 +218,7 @@
                       prepend-icon="mdi-account-box-multiple"
                       dense
                       outlined
-                      maxlength="20"
+                      maxlength="100"
                       v-model="userForm.lineId"
                       :error-messages="errors"
                       label="Line ID"
@@ -228,7 +228,7 @@
                 </v-col>
               </v-row>
 
-              <v-row no-gutters>
+              <!-- <v-row no-gutters>
                 <v-col cols="12">
                   <validation-provider
                     v-slot="{ errors }"
@@ -249,27 +249,7 @@
                     ></v-select>
                   </validation-provider>
                 </v-col>
-              </v-row>
-
-              <v-row no-gutters>
-                <v-col cols="12">
-                  <validation-provider
-                    v-slot="{ errors }"
-                    name="จุดประสงค์การเรียน"
-                    rules="required"
-                  >
-                    <v-select
-                      dense
-                      prepend-icon="mdi-book-open"
-                      :items="objectives"
-                      v-model="userForm.objective"
-                      :error-messages="errors"
-                      label="จุดประสงค์การเรียน"
-                      outlined
-                    ></v-select>
-                  </validation-provider>
-                </v-col>
-              </v-row>
+              </v-row> -->
 
               <v-col cols="12">
                 <v-btn class="mr-4" type="submit" block color="primary">
@@ -315,14 +295,7 @@ export default {
     isLoading: false,
     url: null,
     valid: true,
-    objectives: [
-      "เพื่อไปทำงานในประเทศญี่ปุ่น",
-      "เพื่อศึกษาต่อในประเทศญี่ปุ่น",
-      "เพื่อใช้ในการสอบเข้ามหาวิทยาลัยภายในประเทศ",
-      "เพื่อเพิ่มประสิทธิภาพในการทำงาน",
-      "อื่น ๆ",
-    ],
-    courses: [],
+    // courses: [],
     userForm: {
       username: "",
       password: "",
@@ -339,17 +312,17 @@ export default {
     confirmPassword: "",
   }),
   methods: {
-    getAllCourse() {
-      this.$http
-        .get(`${process.env.VUE_APP_API_PATH}/course/getAllActiveCourse.php`)
-        .then((res) => {
-          this.courses = res.data;
-          console.log("courses", this.courses);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    },
+    // getAllCourse() {
+    //   this.$http
+    //     .get(`${process.env.VUE_APP_API_PATH}/course/getAllActiveCourse.php`)
+    //     .then((res) => {
+    //       this.courses = res.data;
+    //       console.log("courses", this.courses);
+    //     })
+    //     .catch((err) => {
+    //       console.log(err);
+    //     });
+    // },
 
     onFileChange(e) {
       if (e) {
@@ -392,7 +365,7 @@ export default {
     },
   },
   created() {
-    this.getAllCourse();
+    // this.getAllCourse();
   },
 };
 </script>

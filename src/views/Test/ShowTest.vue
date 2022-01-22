@@ -1,7 +1,7 @@
 <template>
   <v-container fluid class="mt-3">
     <v-row class="mt-2" no-gutters>
-      <h3>แบบฝึกหัด</h3>
+      <h3>แบบทดสอบ</h3>
     </v-row>
 
     <!-- <v-row>
@@ -24,7 +24,7 @@
         >
           <template v-slot:top>
             <v-toolbar flat>
-              <v-toolbar-title>จัดการแบบฝึกหัด</v-toolbar-title>
+              <v-toolbar-title>จัดการแบบทดสอบ</v-toolbar-title>
               <v-divider class="mx-4" inset vertical></v-divider>
               <v-spacer></v-spacer>
               <v-dialog v-model="dialog" max-width="500px">
@@ -159,7 +159,7 @@ export default {
     editItem(item) {
       console.log(item);
       this.$router.push({
-        name: "QuizLesson",
+        name: "TestList",
         query: {
           subjectId: item.subjectId,
           subjectName: item.subjectName,

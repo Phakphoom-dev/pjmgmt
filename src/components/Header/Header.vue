@@ -120,12 +120,9 @@
       </template>
       <v-list>
         <div class="text-h5 grey--text text--darken-3 px-4 pt-4">
-          John Smith
+          {{ userData.fullName }}
         </div>
-        <div class="subtitle-2 primary--text font-weight-regular px-4">
-          Flatlogic.com
-        </div>
-        <v-list-item-group color="primary">
+        <!-- <v-list-item-group color="primary">
           <v-list-item v-for="(item, i) in account" :key="i">
             <v-list-item-icon class="mr-4">
               <v-icon :color="item.color" v-text="item.icon"> </v-icon>
@@ -134,15 +131,15 @@
               <v-list-item-title v-text="item.text"></v-list-item-title>
             </v-list-item-content>
           </v-list-item>
-        </v-list-item-group>
+        </v-list-item-group> -->
         <div class="d-flex justify-center my-3">
           <v-btn
             width="80%"
             large
             outlined
             color="primary"
-            class="text-capitalize"
-            @click="logOut"
+            class="text-capitalize mt-2"
+            @click="logout"
             >Sign Out
           </v-btn>
         </div>
@@ -157,6 +154,7 @@ import { mapActions, mapState } from "vuex";
 export default {
   name: "Header",
   data: () => ({
+    userData: JSON.parse(localStorage.getItem("userData")),
     searchCollapse: true,
     notifications: [
       {
@@ -228,10 +226,12 @@ export default {
   },
   methods: {
     ...mapActions("sidebar", ["toggleDrawer"]),
-    logOut() {
-      window.localStorage.setItem("user", null);
+    logout() {
+      window.localStorage.setItem("userData", null);
+      window.localStorage.setItem("isLogin", false);
       this.$router.push("/login");
     },
   },
+  created() {},
 };
 </script>

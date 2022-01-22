@@ -8,12 +8,19 @@
           :items="admins"
           sort-by="username"
           class="elevation-1"
+          :search="search"
         >
           <template v-slot:top>
             <v-toolbar flat>
               <v-toolbar-title>จัดการผู้ใช้งานระบบ</v-toolbar-title>
               <v-divider class="mx-4" inset vertical></v-divider>
-
+              <v-text-field
+                v-model="search"
+                append-icon="mdi-magnify"
+                label="ค้นหาผู้ใช้งานระบบ"
+                single-line
+                hide-details
+              ></v-text-field>
               <v-spacer></v-spacer>
               <v-btn color="primary" dark class="mb-2" to="adduser">
                 เพิ่มผู้ใช้งาน
@@ -32,10 +39,10 @@
           </template>
 
           <template v-slot:item.actions="{ item }">
-            <v-icon small class="mr-2" @click="editItem(item)" color="info">
+            <v-icon class="mr-2" @click="editItem(item)" color="info">
               mdi-pencil
             </v-icon>
-            <v-icon small @click="deleteUser(item)" color="error">
+            <v-icon @click="deleteUser(item)" color="error">
               mdi-delete
             </v-icon>
           </template>
@@ -50,6 +57,7 @@
 export default {
   name: "ShowUsers",
   data: () => ({
+    search: "",
     isLoading: false,
     dialog: false,
     headers: [

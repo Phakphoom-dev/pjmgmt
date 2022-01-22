@@ -1,11 +1,11 @@
 <template>
   <v-container fluid class="mt-3">
-    <v-btn color="info" @click="$router.go(-1)" class="mr-2"
+    <v-btn color="info" @click="$router.go(-1)" class="mr-2 mb-3"
       ><v-icon small class="mr-1">mdi-arrow-left</v-icon> ย้อนกลับ</v-btn
     >
     <Loading v-if="onLoad" />
     <v-card class="mt-auto" v-else>
-      <v-card-title ref="title"> เพิ่มนักเรียน</v-card-title>
+      <v-card-title ref="title"> แก้ไขนักเรียน</v-card-title>
       <v-card-text>
         <validation-observer ref="observer">
           <v-form @submit.prevent="submit">
@@ -22,7 +22,6 @@
                       prepend-icon="mdi-account"
                       dense
                       outlined
-                      maxlength="20"
                       v-model="userForm.username"
                       :error-messages="errors"
                       label="Username"
@@ -191,14 +190,14 @@
                   <validation-provider
                     v-slot="{ errors }"
                     name="อีเมล"
-                    rules="required"
+                    rules="required|email"
                   >
                     <v-text-field
                       type="text"
-                      prepend-icon="mdi-account-box-multiple"
+                      prepend-icon="mdi-email"
                       dense
                       outlined
-                      maxlength="20"
+                      maxlength="100"
                       v-model="userForm.email"
                       :error-messages="errors"
                       label="อีเมล"
@@ -218,7 +217,7 @@
                       prepend-icon="mdi-account-box-multiple"
                       dense
                       outlined
-                      maxlength="20"
+                      maxlength="100"
                       v-model="userForm.lineId"
                       :error-messages="errors"
                       label="Line ID"
@@ -228,7 +227,7 @@
                 </v-col>
               </v-row>
 
-              <v-row no-gutters>
+              <!-- <v-row no-gutters>
                 <v-col cols="12">
                   <validation-provider
                     v-slot="{ errors }"
@@ -250,27 +249,7 @@
                     ></v-select>
                   </validation-provider>
                 </v-col>
-              </v-row>
-
-              <v-row no-gutters>
-                <v-col cols="12">
-                  <validation-provider
-                    v-slot="{ errors }"
-                    name="จุดประสงค์การเรียน"
-                    rules="required"
-                  >
-                    <v-select
-                      dense
-                      prepend-icon="mdi-book-open"
-                      :items="objectives"
-                      v-model="userForm.objective"
-                      :error-messages="errors"
-                      label="จุดประสงค์การเรียน"
-                      outlined
-                    ></v-select>
-                  </validation-provider>
-                </v-col>
-              </v-row>
+              </v-row> -->
 
               <v-col cols="12">
                 <v-btn class="mr-4" type="submit" block color="primary">
@@ -321,14 +300,7 @@ export default {
     isLoading: false,
     url: null,
     valid: true,
-    objectives: [
-      "เพื่อไปทำงานในประเทศญี่ปุ่น",
-      "เพื่อศึกษาต่อในประเทศญี่ปุ่น",
-      "เพื่อใช้ในการสอบเข้ามหาวิทยาลัยภายในประเทศ",
-      "เพื่อเพิ่มประสิทธิภาพในการทำงาน",
-      "อื่น ๆ",
-    ],
-    courses: [],
+    // courses: [],
     userForm: {
       username: "",
       password: "",
@@ -346,37 +318,37 @@ export default {
     confirmPassword: "",
   }),
   methods: {
-    getAllCourse() {
-      this.$http
-        .get(`${process.env.VUE_APP_API_PATH}/course/getAllCourse.php`)
-        .then((res) => {
-          this.courses = res.data;
-          console.log("courses", this.courses);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    },
-    getAllStdCourse() {
-      const jsonData = JSON.stringify({ stdId: this.$route.query.stdId });
+    // getAllCourse() {
+    //   this.$http
+    //     .get(`${process.env.VUE_APP_API_PATH}/course/getAllCourse.php`)
+    //     .then((res) => {
+    //       this.courses = res.data;
+    //       console.log("courses", this.courses);
+    //     })
+    //     .catch((err) => {
+    //       console.log(err);
+    //     });
+    // },
+    // getAllStdCourse() {
+    //   const jsonData = JSON.stringify({ stdId: this.$route.query.stdId });
 
-      this.$http
-        .post(
-          `${process.env.VUE_APP_API_PATH}/student/getAllStdCourse.php`,
-          jsonData
-        )
-        .then((res) => {
-          let stdCourse = res.data;
-          console.log("stdCourse", stdCourse);
-          this.userForm.courseId = stdCourse.map((course) => course.courseId);
-          console.log("course", this.userForm);
-          this.onLoad = false;
-        })
-        .catch((err) => {
-          this.isLoading = false;
-          console.log(err);
-        });
-    },
+    //   this.$http
+    //     .post(
+    //       `${process.env.VUE_APP_API_PATH}/student/getAllStdCourse.php`,
+    //       jsonData
+    //     )
+    //     .then((res) => {
+    //       let stdCourse = res.data;
+    //       console.log("stdCourse", stdCourse);
+    //       this.userForm.courseId = stdCourse.map((course) => course.courseId);
+    //       console.log("course", this.userForm);
+    //       this.onLoad = false;
+    //     })
+    //     .catch((err) => {
+    //       this.isLoading = false;
+    //       console.log(err);
+    //     });
+    // },
     getStudent() {
       const jsonData = JSON.stringify({ stdId: this.$route.query.stdId });
 
@@ -388,12 +360,15 @@ export default {
         .then((res) => {
           this.userForm = res.data[0];
           this.confirmPassword = res.data[0].password;
+          this.onLoad = false;
         })
         .catch((err) => {
+          this.onLoad = false;
           this.isLoading = false;
           console.log(err);
         });
     },
+
     onFileChange(e) {
       if (e) {
         this.url = URL.createObjectURL(e);
@@ -434,9 +409,9 @@ export default {
   },
   async created() {
     this.onLoad = true;
-    await this.getAllCourse();
+    // await this.getAllCourse();
     await this.getStudent();
-    await this.getAllStdCourse();
+    // await this.getAllStdCourse();
   },
 };
 </script>

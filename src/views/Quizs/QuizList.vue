@@ -1,7 +1,7 @@
 <template>
   <v-container fluid class="mt-3">
     <v-row class="mt-2" no-gutters>
-      <h3>จัดการแบบฝึกหัด บทที่ 1 Basic Grammar</h3>
+      <h3>จัดการแบบฝึกหัด {{ $route.query.lessonName }}</h3>
     </v-row>
 
     <!-- <v-row>
@@ -17,9 +17,10 @@
     <v-row class="mt-3">
       <v-col>
         <v-data-table
+          :loading="isLoading"
           :headers="headers"
-          :items="courses"
-          sort-by="username"
+          :items="quizs"
+          sort-by="quizId"
           class="elevation-1"
         >
           <template v-slot:top>
@@ -34,8 +35,8 @@
               <v-spacer></v-spacer>
               <v-dialog v-model="dialog" max-width="500px">
                 <template v-slot:activator="{}">
-                  <v-btn color="primary" dark class="mb-2" to="quiz-add">
-                    เพิ่มข้อสอบ
+                  <v-btn color="primary" dark class="mb-2" @click="addQuiz">
+                    เพิ่มแบบฝึกหัด
                   </v-btn>
                 </template>
 
@@ -86,7 +87,7 @@
                     <v-btn color="blue darken-1" text @click="closeDelete"
                       >ยกเลิก</v-btn
                     >
-                    <v-btn color="blue darken-1" text @click="deleteItemConfirm"
+                    <v-btn color="blue darken-1" text @click="deleteQuizConfirm"
                       >ยืนยัน</v-btn
                     >
                     <v-spacer></v-spacer>
@@ -99,26 +100,26 @@
             {{ props.index + 1 }}
           </template>
 
-          <template v-slot:item.isActive="{ item }">
+          <template v-slot:item.isExam="{ item, index }">
             <div>
               <v-switch
-                v-model="item.isActive"
+                v-model="item.isExam"
                 color="success"
-                :error="!item.isActive"
                 dense
+                @change="changeQuizSta(item.isExam, item.quizId, index)"
               ></v-switch>
             </div>
           </template>
 
           <template v-slot:item.actions="{ item }">
-            <v-icon small class="mr-2" @click="editItem(item)" color="info">
+            <v-icon small class="mr-2" @click="editQuiz(item)" color="info">
               mdi-pencil
             </v-icon>
-            <v-icon small @click="deleteItem(item)" color="error">
+            <v-icon small @click="deleteQuiz(item)" color="error">
               mdi-delete
             </v-icon>
           </template>
-          <template v-slot:no-data> ไม่พบผู้สอน </template>
+          <template v-slot:no-data> ไม่พบแบบฝึกหัดของบทเรียนนี้ </template>
         </v-data-table>
       </v-col>
     </v-row>
@@ -129,13 +130,14 @@
 export default {
   name: "QuizList",
   data: () => ({
-    quiz: [],
+    isLoading: false,
+    quizs: [],
     dialog: false,
     dialogDelete: false,
     headers: [
       { text: "ลำดับที่", value: "index" },
-      { text: "คำถาม", value: "questionName" },
-      { text: "ใช้เป็นแบบทดสอบ", value: "isActive" },
+      { text: "คำถาม", value: "question" },
+      { text: "ใช้เป็นแบบทดสอบ", value: "isExam" },
       { text: "แก้ไข/ลบ", value: "actions", sortable: false },
     ],
     courses: [],
@@ -165,48 +167,109 @@ export default {
     },
   },
 
-  created() {
-    this.initialize();
-  },
-
   methods: {
-    initialize() {
-      this.quiz = this.$route.params.quiz;
+    changeQuizSta(isExam, quizId, index) {
+      let quizStatus = null;
+      isExam ? (quizStatus = 1) : (quizStatus = 0);
 
-      this.courses = [
-        {
-          questionName: "ทดสอบคำถาม",
-          isActive: true,
-        },
-        {
-          questionName: "ทดสอบคำถาม2",
-          isActive: false,
-        },
-      ];
+      let formData = new FormData();
+      formData.append("isExam", quizStatus);
+      formData.append("quizId", quizId);
 
-      console.log(this.quiz);
+      this.$http
+        .post(
+          `${process.env.VUE_APP_API_PATH}/quiz/updateQuizSta.php`,
+          formData
+        )
+        .then((res) => {
+          if (res.status === 200) {
+            console.log("Success");
+          }
+        })
+        .catch((err) => {
+          this.isLoading = false;
+          this.$toast.open({
+            message: err.response.data.message,
+            type: "warning",
+            position: "top-right",
+          });
+          this.getAllCourse();
+        });
     },
 
-    editItem(item) {
-      console.log(item);
+    addQuiz() {
       this.$router.push({
         name: "QuizAdd",
-        params: {
-          quiz: item,
+        query: {
+          lessonId: this.$route.query.lessonId,
+          subjectId: this.$route.query.subjectId,
         },
       });
-      // this.editedIndex = this.courses.indexOf(item);
-      // this.editedItem = Object.assign({}, item);
-      // this.dialog = true;
     },
 
-    deleteItem(item) {
-      this.editedIndex = this.courses.indexOf(item);
-      this.editedItem = Object.assign({}, item);
-      this.dialogDelete = true;
+    getData() {
+      this.lessonId = this.$route.query.lessonId;
+
+      const jsonData = JSON.stringify({
+        lessonId: this.$route.query.lessonId,
+      });
+
+      const data = this.post("/quiz/getLessonQuiz.php", jsonData);
+      data.then((res) => {
+        this.quizs = res.data;
+        console.log("quiz", this.quizs);
+      });
     },
 
-    deleteItemConfirm() {
+    editQuiz(item) {
+      this.$router.push({
+        name: "QuizEdit",
+        query: { quizId: item.quizId },
+      });
+    },
+
+    deleteQuiz(quiz) {
+      this.$swal
+        .fire({
+          title: `ต้องการลบแบบทดสอบหรือไม่หรือไม่`,
+          showDenyButton: true,
+          confirmButtonText: "ยืนยัน",
+          denyButtonText: `ยกเลิก`,
+        })
+        .then((result) => {
+          if (result.isConfirmed) {
+            const jsonData = JSON.stringify({
+              quizId: quiz.quizId,
+              questionImg: quiz.questionImg,
+              lessonId: quiz.lessonId,
+            });
+
+            this.$http
+              .post(
+                `${process.env.VUE_APP_API_PATH}/quiz/deleteQuiz.php`,
+                jsonData
+              )
+              .then((res) => {
+                if (res.status === 200) {
+                  this.getData();
+                }
+              })
+              .catch((err) => {
+                this.isLoading = false;
+                this.$swal({
+                  icon: "error",
+                  text: err.response.data.message,
+                  confirmButtonText: "ตกลง",
+                  allowOutSideClick: false,
+                });
+              });
+          } else if (result.isDenied) {
+            return;
+          }
+        });
+    },
+
+    deleteQuizConfirm() {
       this.courses.splice(this.editedIndex, 1);
       this.closeDelete();
     },
@@ -235,6 +298,10 @@ export default {
       }
       this.close();
     },
+  },
+
+  created() {
+    this.getData();
   },
 };
 </script>

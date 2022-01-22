@@ -8,11 +8,19 @@
           :items="students"
           sort-by="username"
           class="elevation-1"
+          :search="search"
         >
           <template v-slot:top>
             <v-toolbar flat>
               <v-toolbar-title>จัดการผู้เรียน</v-toolbar-title>
               <v-divider class="mx-4" inset vertical></v-divider>
+              <v-text-field
+                v-model="search"
+                append-icon="mdi-magnify"
+                label="ค้นหาผู้เรียน"
+                single-line
+                hide-details
+              ></v-text-field>
               <v-spacer></v-spacer>
               <v-btn color="primary" dark class="mb-2" to="addstudent">
                 เพิ่มผู้เรียน
@@ -24,31 +32,38 @@
             {{ props.index + 1 }}
           </template>
 
-          <template v-slot:item.stdImg="{ item }">
-            <div class="ma-3">
-              <v-img
-                max-height="150"
-                max-width="250"
-                :src="imgPath(item.stdImg, 'student')"
-              ></v-img>
-            </div>
-          </template>
-
           <template v-slot:item.registeredDate="{ item }">
             {{ item.regisDate | moment("DD/MM/YYYY HH:mm:ss") }}
           </template>
 
+          <template v-slot:item.visitLog="{ item }">
+            <v-icon @click="visitReport(item)" color="info">
+              mdi-file-clock
+            </v-icon>
+          </template>
+
           <template v-slot:item.courseName="{ item }">
-            <v-chip color="info" @click="watchCourse(item)">
-              หลักสูตรที่ลงทะเบียน
-            </v-chip>
+            <v-icon color="info" @click="watchSubject(item)"
+              >mdi-file-edit</v-icon
+            >
+          </template>
+
+          <template v-slot:item.status="{ item, index }">
+            <div>
+              <v-switch
+                v-model="item.status"
+                color="success"
+                dense
+                @change="changeStatus(item.status, item.stdId, index)"
+              ></v-switch>
+            </div>
           </template>
 
           <template v-slot:item.actions="{ item }">
-            <v-icon small class="mr-2" @click="editStd(item)" color="info">
+            <v-icon class="mr-2" @click="editStd(item)" color="info">
               mdi-pencil
             </v-icon>
-            <v-icon small @click="deleteStudent(item)" color="error">
+            <v-icon @click="deleteStudent(item)" color="error">
               mdi-delete
             </v-icon>
           </template>
@@ -58,19 +73,88 @@
     </v-row>
 
     <v-row justify="center">
-      <v-dialog v-model="dialog" scrollable max-width="400px">
+      <v-dialog v-model="dialog" scrollable max-width="1000px">
         <v-card>
-          <v-card-title>หลักสูตรที่ลงทะเบียน</v-card-title>
+          <v-card-title
+            >หลักสูตรที่ลงทะเบียน |
+            <v-btn
+              color="success"
+              dark
+              class="ml-3"
+              :to="{ name: 'RegisterSubject', params: { stdId: stdId } }"
+            >
+              ลงทะเบียน
+            </v-btn></v-card-title
+          >
+
           <v-divider></v-divider>
           <v-card-text style="height: 300px">
-            <v-row class="mt-2" cols="12">
-              <v-col
-                cols="12"
-                v-for="(course, index) in courses"
-                :key="course.courseId"
-                ><h6>{{ index + 1 }}. {{ course.courseName }}</h6></v-col
-              >
-            </v-row>
+            <v-data-table
+              :headers="subjectHeaders"
+              :items="subjects"
+              sort-by="regisDate"
+              class="elevation-1 mt-3"
+              hide-default-header
+            >
+              <template v-slot:header="{ props: { headers } }">
+                <thead>
+                  <tr class="primary">
+                    <th
+                      v-for="h in headers"
+                      class="white--text"
+                      :key="h.subjectId"
+                    >
+                      <span>{{ h.text }}</span>
+                    </th>
+                  </tr>
+                </thead>
+              </template>
+
+              <template slot="item.index" scope="props">
+                {{ props.index + 1 }}
+              </template>
+
+              <template v-slot:item.regisDate="{ item }">
+                {{ toThaiDateString(new Date(item.regisDate)) }}
+              </template>
+
+              <template v-slot:item.finishDate="{ item }">
+                <v-chip
+                  :class="[
+                    isFinish(item.finishDate) === 'สำเร็จการศึกษา'
+                      ? 'primary'
+                      : 'warning',
+                  ]"
+                >
+                  {{ isFinish(item.finishDate) }}
+                </v-chip>
+              </template>
+
+              <template v-slot:no-data> ไม่พบประวัติการลงทะเบียน </template>
+            </v-data-table>
+            <!-- <v-row
+              class="mt-2"
+              cols="12"
+              v-for="(subject, index) in subjects"
+              :key="subject.subjectId"
+            >
+              <v-col cols="12"
+                ><h6>
+                  {{ index + 1 }}. {{ subject.subjectName }} | วันที่สมัคร
+                  {{ toThaiDateString(new Date(subject.regisDate)) }}
+                  | สถานะ
+                  <v-chip
+                    :class="[
+                      isFinish(subject.finishDate) === 'สำเร็จการศึกษา'
+                        ? 'primary'
+                        : 'warning',
+                    ]"
+                  >
+                    {{ isFinish(subject.finishDate) }}
+                  </v-chip>
+                </h6>
+              </v-col>
+            </v-row> -->
           </v-card-text>
           <v-divider></v-divider>
           <v-card-actions>
@@ -90,21 +174,35 @@ import "@/mixins/generalMixin";
 export default {
   name: "ShowStudents",
   data: () => ({
+    search: "",
+    stdId: null,
     dialog: false,
+    subjectHeaders: [
+      { text: "ลำดับที่", value: "index", sortable: false },
+      { text: "วันที่ลงทะเบียน", value: "regisDate" },
+      { text: "หลักสูตรที่ลงทะเบียน", value: "subjectName" },
+      { text: "สถานะ", value: "finishDate" },
+      { text: "จุดประสงค์การเรียน", value: "objective" },
+    ],
     headers: [
       { text: "ลำดับที่", value: "index", sortable: false },
-      { text: "รูปภาพ", value: "stdImg", sortable: false },
       {
         text: "ชื่อ-นามสกุล",
         align: "start",
         value: "fullName",
       },
-      { text: "เวลาที่สมัคร", value: "registeredDate" },
-      { text: "หลักสูตรที่ลงทะเบียน", value: "courseName" },
+      { text: "การใช้งาน", value: "status" },
+      {
+        text: "การเข้า-ออกระบบ",
+        value: "visitLog",
+        sortable: false,
+        align: "center",
+      },
+      { text: "หลักสูตรที่ลงทะเบียน", value: "courseName", align: "center" },
       { text: "แก้ไข/ลบ", value: "actions", sortable: false },
     ],
     students: [],
-    courses: [],
+    subjects: [],
     editedIndex: -1,
     editedItem: {
       fullname: "",
@@ -123,6 +221,18 @@ export default {
   },
 
   methods: {
+    visitReport(item) {
+      this.$router.push({
+        name: "StudentLog",
+        query: { stdId: item.stdId },
+      });
+    },
+
+    isFinish(finishDate) {
+      const status = finishDate !== null ? "สำเร็จการศึกษา" : "กำลังศึกษา";
+      return status;
+    },
+
     deleteStudent(item) {
       this.$swal
         .fire({
@@ -170,17 +280,52 @@ export default {
       });
     },
 
-    watchCourse(item) {
+    changeStatus(status, stdId, index) {
+      let stdStatus = null;
+      status ? (stdStatus = 1) : (stdStatus = 0);
+
+      let formData = new FormData();
+      formData.append("status", stdStatus);
+      formData.append("stdId", stdId);
+
+      this.$http
+        .post(
+          `${process.env.VUE_APP_API_PATH}/student/updateStudentSta.php`,
+          formData
+        )
+        .then((res) => {
+          if (res.status === 200) {
+            console.log(this.students[index]);
+          }
+        })
+        .catch((err) => {
+          this.isLoading = false;
+          this.$toast.open({
+            message: err.response.data.message,
+            type: "warning",
+            position: "top-right",
+          });
+          this.getAllCourse();
+        });
+    },
+
+    watchSubject(item) {
       const jsonData = JSON.stringify({ stdId: item.stdId });
 
       this.$http
         .post(
-          `${process.env.VUE_APP_API_PATH}/student/getAllStdCourse.php`,
+          `${process.env.VUE_APP_API_PATH}/student/getAllStdSubject.php`,
           jsonData
         )
         .then((res) => {
+          this.stdId = item.stdId;
           this.dialog = true;
-          this.courses = res.data;
+          if (res.data.message === "ไม่พบข้อมูล") {
+            this.subjects = [];
+          } else {
+            this.subjects = res.data;
+          }
+          console.log("subjects", this.subjects);
         })
         .catch((err) => {
           this.isLoading = false;
@@ -204,19 +349,10 @@ export default {
       let color = "";
       switch (status) {
         case "กำลังศึกษา":
-          color = "primary";
-          break;
-        case "รอการยืนยัน":
-          color = "warning";
-          break;
-        case "สำเร็จการศึกษา":
           color = "success";
           break;
-        case "ยกเลิก":
-          color = "error";
-          break;
-        default:
-          color = "grey";
+        case "ยกเลิกการใช้งาน":
+          color = "warning";
           break;
       }
       return color;

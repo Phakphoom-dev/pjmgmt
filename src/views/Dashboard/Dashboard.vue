@@ -4,39 +4,39 @@
     <v-row class="mt-3">
       <v-col xs="12" sm="6" lg="3">
         <dashboard-card
-          title="นักเรียนที่สมัครวันนี้"
+          title="ผู้เรียนทั้งหมด"
           info="10 คน"
           icon="mdi-account-arrow-right"
         ></dashboard-card>
       </v-col>
       <v-col xs="12" sm="6" lg="3">
         <dashboard-card
-          title="นักเรียนที่รอการยืนยัน"
+          title="ผู้เรียนที่กำลังศึกษา"
           info="3 คน"
           icon="mdi-account-clock"
         ></dashboard-card>
       </v-col>
       <v-col xs="12" sm="6" lg="3">
         <dashboard-card
-          title="นักเรียนที่กำลังศึกษา"
+          title="ผู้เรียนที่ผ่านการทดสอบ"
           info="7 คน"
           icon="mdi-book-open-blank-variant"
         ></dashboard-card>
       </v-col>
-      <v-col xs="12" sm="6" lg="3">
+      <!-- <v-col xs="12" sm="6" lg="3">
         <dashboard-card
           title="นักเรียนทั้งหมด"
           info="30 คน"
           icon="mdi-account-group"
         ></dashboard-card>
-      </v-col>
+      </v-col> -->
     </v-row>
 
     <v-row class="mt-3">
       <v-col>
         <v-card class="pa-3">
           <v-card-title
-            >ข้อมูลนักศึกษาที่สมัครเรียนล่าสุด 10 อันดับแรก</v-card-title
+            >ข้อมูลผู้เรียนที่สมัครเรียนล่าสุด 10 อันดับแรก</v-card-title
           >
           <v-card-text>
             <v-simple-table class="elevation-2">
@@ -46,7 +46,7 @@
                     <th class="text-left">ลำดับ</th>
                     <th class="text-left">ชื่อ-สกุล</th>
                     <th class="text-left">วัน-เวลาที่สมัคร</th>
-                    <th class="text-left">สถานะ</th>
+                    <th class="text-left">หลักสูตร</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -54,16 +54,43 @@
                     <td>{{ index + 1 }}</td>
                     <td>{{ user.fullname }}</td>
                     <td>{{ user.datetime }}</td>
-                    <td>
-                      <v-chip
-                        class="ma-2"
-                        :color="
-                          user.status === 'กำลังศึกษา' ? 'info' : 'warning'
+                    <td>{{ user.subject }}</td>
+                    <td
+                      :class="
+                          user.status === 'กำลังศึกษา'
+                            ? 'info--text'
+                            : 'warning--text',
                         "
-                      >
-                        {{ user.status }}
-                      </v-chip>
-                    </td>
+                    ></td>
+                  </tr>
+                </tbody>
+              </template>
+            </v-simple-table>
+          </v-card-text>
+
+          <v-card-title>ข้อมูลหลักสูตรที่สมัครเรียน</v-card-title>
+          <v-card-text>
+            <v-simple-table class="elevation-2">
+              <template v-slot:default>
+                <thead>
+                  <tr>
+                    <th class="text-left">ลำดับ</th>
+                    <th class="text-left">ชื่อหลักสูตร</th>
+                    <th class="text-left">จำนวนผู้สมัครทั้งหมด</th>
+                    <th class="text-left">ผู้เรียนที่กำลังศึกษา</th>
+                    <th class="text-left">ผู้เรียนที่ผ่านการทดสอบ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="(subject, index) in students"
+                    :key="subject.subjectName"
+                  >
+                    <td>{{ index + 1 }}</td>
+                    <td>{{ subject.subjectName }}</td>
+                    <td>{{ subject.totalStd }}</td>
+                    <td class="warning--text">{{ subject.learningStd }}</td>
+                    <td class="success--text">{{ subject.finished }}</td>
                   </tr>
                 </tbody>
               </template>
@@ -77,6 +104,7 @@
 
 <script>
 import { users } from "./mockUser";
+import { students } from "./mockSubject";
 import DashboardCard from "@/components/Card/DashboardCard";
 
 export default {
@@ -101,6 +129,7 @@ export default {
         },
       ],
       users,
+      students,
     };
   },
 };

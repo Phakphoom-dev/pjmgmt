@@ -11,7 +11,7 @@
             But we're here to bring you back to safety
           </p>
 
-          <v-btn class="text-capitalize" dark x-large to="dashboard">
+          <v-btn class="text-capitalize" dark x-large to="/">
             Back to Home
           </v-btn>
         </div>

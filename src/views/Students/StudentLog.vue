@@ -1,13 +1,17 @@
 <template>
   <v-container fluid class="mt-3">
     <v-row class="mt-2" no-gutters>
-      <h3>แบบฝึกหัด</h3>
+      <h3>รายงาน การเข้า-ออกระบบ</h3>
     </v-row>
+
+    <v-btn color="info" @click="$router.go(-1)" class="mr-2"
+      ><v-icon small class="mr-1">mdi-arrow-left</v-icon> ย้อนกลับ</v-btn
+    >
 
     <!-- <v-row>
       <v-col>
-        <v-btn color="secondary" to="subjects">จัดการหลักสูตร</v-btn>
-        <v-btn color="primary" class="ml-2" to="subjects/subjects"
+        <v-btn color="secondary" to="studentLog">จัดการหลักสูตร</v-btn>
+        <v-btn color="primary" class="ml-2" to="studentLog/subjects"
           >จัดการรายวิชา</v-btn
         >
         <v-btn color="secondary" class="ml-2">จัดการบทเรียน</v-btn>
@@ -18,13 +22,15 @@
       <v-col>
         <v-data-table
           :headers="headers"
-          :items="subjects"
+          :items="studentLog"
           sort-by="username"
           class="elevation-1"
         >
           <template v-slot:top>
             <v-toolbar flat>
-              <v-toolbar-title>จัดการแบบฝึกหัด</v-toolbar-title>
+              <v-toolbar-title
+                >ข้อมูลการเข้าใช้งานระบบ - {{ fullName }}</v-toolbar-title
+              >
               <v-divider class="mx-4" inset vertical></v-divider>
               <v-spacer></v-spacer>
               <v-dialog v-model="dialog" max-width="500px">
@@ -88,23 +94,40 @@
             {{ props.index + 1 }}
           </template>
 
-          <template v-slot:item.active="{ item }">
-            <div>
-              <v-switch
-                v-model="item.active"
-                color="success"
-                :error="!item.active"
-                dense
-              ></v-switch>
-            </div>
+          <template v-slot:item.loginTime="{ item }">
+            {{
+              item.logType === "login"
+                ? toThaiDateString(new Date(item.logTime))
+                : "-"
+            }}
           </template>
 
-          <template v-slot:item.actions="{ item }">
-            <v-icon class="mr-2" @click="editItem(item)" color="info">
-              mdi-pencil
-            </v-icon>
+          <template v-slot:item.logoutTime="{ item }">
+            {{
+              item.logType === "logout"
+                ? toThaiDateString(new Date(item.logTime))
+                : "-"
+            }}
           </template>
-          <template v-slot:no-data> ไม่พบหลักสูตร </template>
+
+          <!-- <template v-slot:item.logType="{ item }">
+            <v-chip :color="item.logType === 'login' ? 'primary' : 'warning'">
+              {{
+                item.logType === "login" ? "เข้าสู่ระบบ" : "ออกจากระบบ"
+              }}</v-chip
+            >
+          </template> -->
+          <!-- 
+          <template slot="body.append">
+            <tr class="primary--text">
+              <th><h6>รวม</h6></th>
+              <th></th>
+              <th></th>
+              <th></th>
+              <th><h6>2 ชม.</h6></th>
+            </tr>
+          </template> -->
+          <template v-slot:no-data> ยังไม่มีบันทึกการเข้าระบบ </template>
         </v-data-table>
       </v-col>
     </v-row>
@@ -112,18 +135,21 @@
 </template>
 
 <script>
+import "@/mixins/generalMixin";
+
 export default {
-  name: "ShowQuizs",
+  name: "StudentLog",
   data: () => ({
+    fullName: "",
     dialog: false,
     dialogDelete: false,
     headers: [
       { text: "ลำดับที่", value: "index" },
-      { text: "รายวิชา", value: "subjectName" },
-      { text: "จำนวนบทเรียน", value: "lessonAmount" },
-      { text: "จัดการ", value: "actions", sortable: false },
+      { text: "วัน-เวลาที่เข้าระบบ", value: "loginTime" },
+      { text: "วัน-เวลาที่ออกระบบ", value: "logoutTime" },
+      { text: "จาก IP", value: "ipAddress" },
     ],
-    subjects: [],
+    studentLog: [],
     editedIndex: -1,
     editedItem: {
       subjectName: "",
@@ -151,30 +177,51 @@ export default {
   },
 
   methods: {
-    async getData() {
-      this.subjects = await this.get("/subject/getAllSubject.php");
-      console.log(this.subjects);
+    visitReport() {
+      this.$router.push("visitreport");
     },
-
+    stdStaColor(status) {
+      let color = "";
+      switch (status) {
+        case "กำลังศึกษา":
+          color = "primary";
+          break;
+        case "รอการยืนยัน":
+          color = "warning";
+          break;
+        case "สำเร็จการศึกษา":
+          color = "success";
+          break;
+        case "ยกเลิก":
+          color = "error";
+          break;
+        default:
+          color = "grey";
+          break;
+      }
+      return color;
+    },
     editItem(item) {
       console.log(item);
       this.$router.push({
-        name: "QuizLesson",
-        query: {
-          subjectId: item.subjectId,
-          subjectName: item.subjectName,
+        name: "ExamQuizs",
+        params: {
+          quiz: item,
         },
       });
+      // this.editedIndex = this.studentLog.indexOf(item);
+      // this.editedItem = Object.assign({}, item);
+      // this.dialog = true;
     },
 
     deleteItem(item) {
-      this.editedIndex = this.subjects.indexOf(item);
+      this.editedIndex = this.studentLog.indexOf(item);
       this.editedItem = Object.assign({}, item);
       this.dialogDelete = true;
     },
 
     deleteItemConfirm() {
-      this.subjects.splice(this.editedIndex, 1);
+      this.studentLog.splice(this.editedIndex, 1);
       this.closeDelete();
     },
 
@@ -196,16 +243,35 @@ export default {
 
     save() {
       if (this.editedIndex > -1) {
-        Object.assign(this.subjects[this.editedIndex], this.editedItem);
+        Object.assign(this.studentLog[this.editedIndex], this.editedItem);
       } else {
-        this.subjects.push(this.editedItem);
+        this.studentLog.push(this.editedItem);
       }
       this.close();
+    },
+
+    getStdLog() {
+      let formData = new FormData();
+      formData.append("stdId", this.$route.query.stdId);
+
+      this.$http
+        .post(`${process.env.VUE_APP_API_PATH}/student/getStdLog.php`, formData)
+        .then((res) => {
+          if (res.status === 200) {
+            this.studentLog = res.data;
+            this.fullName = res.data[0].fullName;
+            console.log("studentLog", this.studentLog);
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     },
   },
 
   created() {
-    this.getData();
+    console.log(this.$route.query.stdId);
+    this.getStdLog();
   },
 };
 </script>

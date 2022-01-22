@@ -4,7 +4,7 @@
       ><v-icon small class="mr-1">mdi-arrow-left</v-icon> ย้อนกลับ</v-btn
     >
     <v-card class="mt-3">
-      <v-card-title> เพิ่มหลักสูตร</v-card-title>
+      <v-card-title> เพิ่มคอร์สหลัก</v-card-title>
       <v-card-text>
         <validation-observer ref="observer">
           <v-form @submit.prevent="submit">
@@ -13,7 +13,7 @@
                 <v-col cols="12">
                   <validation-provider
                     v-slot="{ errors }"
-                    name="ชื่อหลักสูตร"
+                    name="ชื่อคอร์สหลัก"
                     rules="required"
                   >
                     <v-text-field
@@ -24,7 +24,7 @@
                       maxlength="100"
                       v-model="courseName"
                       :error-messages="errors"
-                      label="ชื่อหลักสูตร"
+                      label="ชื่อคอร์สหลัก"
                       required
                     ></v-text-field>
                   </validation-provider>

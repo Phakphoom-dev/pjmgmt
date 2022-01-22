@@ -1,7 +1,7 @@
 <template>
   <v-container fluid class="mt-3">
     <v-row class="mt-2" no-gutters>
-      <h3>หลักสูตร</h3>
+      <h3>คอร์สหลัก</h3>
     </v-row>
 
     <!-- <v-row>
@@ -21,14 +21,22 @@
           :items="courses"
           sort-by="username"
           class="elevation-1"
+          :search="search"
         >
           <template v-slot:top>
             <v-toolbar flat>
-              <v-toolbar-title>จัดการหลักสูตร</v-toolbar-title>
+              <v-toolbar-title>คอร์สหลัก</v-toolbar-title>
               <v-divider class="mx-4" inset vertical></v-divider>
+              <v-text-field
+                v-model="search"
+                append-icon="mdi-magnify"
+                label="ค้นหาคอร์สหลัก"
+                single-line
+                hide-details
+              ></v-text-field>
               <v-spacer></v-spacer>
               <v-btn color="primary" dark class="mb-2" to="addcourse">
-                เพิ่มหลักสูตร
+                เพิ่มคอร์สหลัก
               </v-btn>
             </v-toolbar>
           </template>
@@ -48,10 +56,10 @@
           </template>
 
           <template v-slot:item.actions="{ item }">
-            <v-icon small class="mr-2" @click="editCourse(item)" color="info">
+            <v-icon class="mr-2" @click="editCourse(item)" color="info">
               mdi-pencil
             </v-icon>
-            <v-icon small @click="deleteCourse(item)" color="error">
+            <v-icon @click="deleteCourse(item)" color="error">
               mdi-delete
             </v-icon>
           </template>
@@ -68,6 +76,7 @@ import "@/mixins/generalMixin";
 export default {
   name: "ShowCourses",
   data: () => ({
+    search: "",
     isLoading: false,
     dialog: false,
     dialogDelete: false,

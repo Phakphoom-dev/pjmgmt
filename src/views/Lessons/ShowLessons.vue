@@ -21,11 +21,19 @@
           :items="lessons"
           sort-by="username"
           class="elevation-1"
+          :search="search"
         >
           <template v-slot:top>
             <v-toolbar flat>
               <v-toolbar-title>จัดการบทเรียน</v-toolbar-title>
               <v-divider class="mx-4" inset vertical></v-divider>
+              <v-text-field
+                v-model="search"
+                append-icon="mdi-magnify"
+                label="ค้นหาบทเรียน / หลักสูตร"
+                single-line
+                hide-details
+              ></v-text-field>
               <v-spacer></v-spacer>
               <v-btn
                 color="primary"
@@ -63,10 +71,10 @@
           </template>
 
           <template v-slot:item.actions="{ item }">
-            <v-icon small class="mr-2" @click="editLesson(item)" color="info">
+            <v-icon class="mr-2" @click="editLesson(item)" color="info">
               mdi-pencil
             </v-icon>
-            <v-icon small @click="deleteLesson(item)" color="error">
+            <v-icon @click="deleteLesson(item)" color="error">
               mdi-delete
             </v-icon>
           </template>
@@ -82,6 +90,7 @@ import "@/mixins/generalMixin";
 export default {
   name: "ShowLessons",
   data: () => ({
+    search: "",
     dialog: false,
     dialogDelete: false,
     headers: [
@@ -92,7 +101,7 @@ export default {
         value: "lessonName",
       },
       { text: "รูปหน้าปก", value: "lessonImage" },
-      { text: "รายวิชา", value: "subjectName" },
+      { text: "หลักสูตร", value: "subjectName" },
       { text: "จำนวนวิดีโอ", value: "videoAmount" },
       { text: "การใช้งาน", value: "lessonSta" },
       { text: "แก้ไข/ลบ", value: "actions", sortable: false },
