@@ -115,6 +115,7 @@
 export default {
   name: "ShowExams",
   data: () => ({
+    search: "",
     dialog: false,
     dialogDelete: false,
     headers: [

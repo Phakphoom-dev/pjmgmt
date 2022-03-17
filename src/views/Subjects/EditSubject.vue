@@ -174,26 +174,20 @@
                 <v-col cols="12">
                   <v-row>
                     <v-col cols="12">
-                      <validation-provider
-                        v-slot="{ errors }"
-                        name="อาจารย์ผู้สอน"
-                        rules="required"
-                      >
-                        <v-select
-                          dense
-                          prepend-icon="mdi-account"
-                          :items="teachers"
-                          item-value="teacherId"
-                          item-text="fullName"
-                          v-model="subjectForm.teacherList"
-                          label="อาจารย์ผู้สอน"
-                          :error-messages="errors"
-                          multiple
-                          outlined
-                          small-chips
-                          persistent-hint
-                        ></v-select>
-                      </validation-provider>
+                      <v-select
+                        dense
+                        prepend-icon="mdi-account"
+                        :items="teachers"
+                        item-value="teacherId"
+                        item-text="fullName"
+                        v-model="subjectForm.teacherList"
+                        label="อาจารย์ผู้สอน"
+                        :error-messages="errors"
+                        multiple
+                        outlined
+                        small-chips
+                        persistent-hint
+                      ></v-select>
                     </v-col>
                   </v-row>
                 </v-col>
@@ -353,6 +347,7 @@ export default {
         })
         .catch((err) => {
           this.isLoading = false;
+          this.onLoad = false;
           console.log(err);
         });
     },

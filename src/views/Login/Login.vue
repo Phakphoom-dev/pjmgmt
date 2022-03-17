@@ -5,7 +5,7 @@
         <v-col cols="7" class="main-part d-none d-md-none d-lg-flex">
           <div class="d-flex">
             <v-img src="@/assets/logo.svg" contain></v-img>
-            <p>E-learning</p>
+            <p>{{ title }}</p>
           </div>
         </v-col>
 
@@ -101,6 +101,7 @@ export default {
   name: "Login",
   data() {
     return {
+      title: "",
       isLoading: false,
       username: "",
       usernameRules: [(v) => !!v || "Username is required"],
@@ -120,7 +121,12 @@ export default {
           this.isLoading = false;
           localStorage.setItem("userData", JSON.stringify(res.data[0]));
           localStorage.setItem("isLogin", true);
-          this.$router.push("/");
+
+          if (res.data[0].role === "teacher") {
+            this.$router.push("/lessons/subject-lesson");
+          } else {
+            this.$router.push("/");
+          }
         })
         .catch((err) => {
           this.isLoading = false;
@@ -135,6 +141,21 @@ export default {
           return;
         });
     },
+    getTitle() {
+      this.$http
+        .get(`${process.env.VUE_APP_API_PATH}/manage/getTitle.php`)
+        .then((res) => {
+          this.title = res.data[0].title;
+          this.isLoading = false;
+        })
+        .catch((err) => {
+          this.isLoading = false;
+          console.log(err);
+        });
+    },
+  },
+  created() {
+    this.getTitle();
   },
 };
 </script>

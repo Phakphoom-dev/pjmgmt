@@ -23,6 +23,13 @@
                 <tbody>
                   <tr v-for="(slide, index) in slides" :key="slide.slideId">
                     <td>{{ index + 1 }}</td>
+                    <td class="pa-5">
+                      <v-img
+                        max-height="150"
+                        max-width="150"
+                        :src="imgPath(slide.slideImg, 'slide')"
+                      ></v-img>
+                    </td>
                     <td>{{ slide.slideTitle }}</td>
                     <td>
                       <v-icon

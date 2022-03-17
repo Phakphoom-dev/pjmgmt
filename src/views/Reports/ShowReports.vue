@@ -17,8 +17,9 @@
     <v-row class="mt-3">
       <v-col>
         <v-data-table
+          :loading="isLoading"
           :headers="headers"
-          :items="courses"
+          :items="students"
           sort-by="username"
           class="elevation-1"
         >
@@ -56,29 +57,8 @@
 
                   <v-card-actions>
                     <v-spacer></v-spacer>
-                    <v-btn color="blue darken-1" text @click="close">
-                      ยกเลิก
-                    </v-btn>
-                    <v-btn color="blue darken-1" text @click="save">
-                      ยืนยัน
-                    </v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
-              <v-dialog v-model="dialogDelete" max-width="500px">
-                <v-card>
-                  <v-card-title class="text-h5"
-                    >ต้องการลบผู้สอนหรือไม่ ?</v-card-title
-                  >
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="blue darken-1" text @click="closeDelete"
-                      >ยกเลิก</v-btn
-                    >
-                    <v-btn color="blue darken-1" text @click="deleteItemConfirm"
-                      >ยืนยัน</v-btn
-                    >
-                    <v-spacer></v-spacer>
+                    <v-btn color="blue darken-1" text> ยกเลิก </v-btn>
+                    <v-btn color="blue darken-1" text> ยืนยัน </v-btn>
                   </v-card-actions>
                 </v-card>
               </v-dialog>
@@ -88,8 +68,12 @@
             {{ props.index + 1 }}
           </template>
 
-          <template v-slot:item.registeredDate="{}">
-            {{ new Date() | moment("DD/MM/YYYY HH:mm:ss") }}
+          <template v-slot:item.regisDate="{ item }">
+            {{
+              toThaiDateString(
+                new Date(item.regisDate.replace(/\s/, "T") + "Z")
+              )
+            }}
           </template>
 
           <template v-slot:item.active="{ item }">
@@ -103,18 +87,21 @@
             </div>
           </template>
 
-          <template v-slot:item.visitLog="{ item }">
-            <v-icon @click="visitReport(item)" color="info"> mdi-eye </v-icon>
+          <template v-slot:item.courseName="{ item }">
+            <v-icon color="info" @click="watchSubject(item)"
+              >mdi-file-edit</v-icon
+            >
           </template>
+
           <template v-slot:item.quizLog="{ item }">
             <v-icon @click="quizReport(item)" color="info"> mdi-eye </v-icon>
           </template>
           <template v-slot:item.examLog="{ item }">
             <v-icon @click="examReport(item)" color="info"> mdi-eye </v-icon>
           </template>
-          <template v-slot:item.stdStatus="{ item }">
-            <v-chip :color="stdStaColor(item.stdStatus)">
-              {{ item.stdStatus }}
+          <template v-slot:item.status="{ item }">
+            <v-chip :color="stdStaColor(item.status)">
+              {{ item.status === 1 ? "On" : "Off" }}
             </v-chip>
           </template>
           <template v-slot:no-data> ไม่พบผู้สอน </template>
@@ -125,19 +112,22 @@
 </template>
 
 <script>
+import "@/mixins/generalMixin";
+
 export default {
-  name: "ShowExams",
+  name: "ShowReports",
   data: () => ({
+    isLoading: false,
     dialog: false,
     dialogDelete: false,
     headers: [
       { text: "ลำดับที่", value: "index" },
-      { text: "ชื่อ-นามสกุล", value: "fullname" },
+      { text: "ชื่อ-นามสกุล", value: "fullName" },
       { text: "อีเมล", value: "email" },
-      { text: "วันที่สมัคร", value: "registeredDate" },
+      { text: "วันที่สมัคร", value: "regisDate" },
       {
-        text: "การเข้า-ออกระบบ",
-        value: "visitLog",
+        text: "หลักสูตรที่ลงทะเบียน",
+        value: "courseName",
         sortable: false,
         align: "center",
       },
@@ -153,9 +143,10 @@ export default {
         sortable: false,
         align: "center",
       },
-      { text: "สถานะผู้เรียน", value: "stdStatus" },
+      { text: "สถานะการใช้งาน", value: "status" },
     ],
     courses: [],
+    students: [],
     editedIndex: -1,
     editedItem: {
       subjectName: "",
@@ -173,126 +164,69 @@ export default {
     },
   },
 
-  watch: {
-    dialog(val) {
-      val || this.close();
-    },
-    dialogDelete(val) {
-      val || this.closeDelete();
-    },
-  },
-
-  created() {
-    this.initialize();
-  },
-
   methods: {
-    initialize() {
-      this.courses = [
-        {
-          fullname: "นายทดสอบ ผู้ใช้งาน",
-          email: "Test1231@gmail.com",
-          registeredDate: null,
-          stdStatus: "กำลังศึกษา",
+    watchSubject(item) {
+      console.log(item);
+      this.$router.push({
+        name: "SubjectReport",
+        query: {
+          stdId: item.stdId,
+          stdName: item.fullName,
         },
-        {
-          fullname: "นายทดสอบ ผู้ใช้งาน2",
-          email: "Test1232@gmail.com",
-          registeredDate: null,
-          stdStatus: "รอการยืนยัน",
-        },
-        {
-          fullname: "นายทดสอบ ผู้ใช้งาน3",
-          email: "Test1233@gmail.com",
-          registeredDate: null,
-          stdStatus: "สำเร็จการศึกษา",
-        },
-        {
-          fullname: "นายทดสอบ ผู้ใช้งาน4",
-          email: "Test1234@gmail.com",
-          registeredDate: null,
-          stdStatus: "ยกเลิก",
-        },
-      ];
+      });
     },
-    visitReport() {
-      this.$router.push("visitreport");
+
+    quizReport(item) {
+      console.log(item);
+      this.$router.push({
+        name: "QuizReport",
+        query: {
+          stdId: item.stdId,
+          stdName: item.fullName,
+        },
+      });
     },
-    quizReport() {
-      this.$router.push("quizreport");
-    },
-    examReport() {
-      this.$router.push("examreport");
+    examReport(item) {
+      console.log(item);
+      this.$router.push({
+        name: "QuizReport",
+        query: {
+          stdId: item.stdId,
+          stdName: item.fullName,
+          action: "exam",
+        },
+      });
     },
     stdStaColor(status) {
       let color = "";
       switch (status) {
-        case "กำลังศึกษา":
-          color = "primary";
-          break;
-        case "รอการยืนยัน":
-          color = "warning";
-          break;
-        case "สำเร็จการศึกษา":
+        case 1:
           color = "success";
           break;
-        case "ยกเลิก":
+        case 0:
           color = "error";
-          break;
-        default:
-          color = "grey";
           break;
       }
       return color;
     },
-    editItem(item) {
-      console.log(item);
-      this.$router.push({
-        name: "ExamQuizs",
-        params: {
-          quiz: item,
-        },
-      });
-      // this.editedIndex = this.courses.indexOf(item);
-      // this.editedItem = Object.assign({}, item);
-      // this.dialog = true;
-    },
+    getAllStudent() {
+      this.isLoading = true;
 
-    deleteItem(item) {
-      this.editedIndex = this.courses.indexOf(item);
-      this.editedItem = Object.assign({}, item);
-      this.dialogDelete = true;
+      this.$http
+        .get(`${process.env.VUE_APP_API_PATH}/student/getAllStudent.php`)
+        .then((res) => {
+          this.isLoading = false;
+          this.students = res.data;
+          console.log("students", this.students);
+        })
+        .catch((err) => {
+          this.isLoading = false;
+          console.log(err);
+        });
     },
-
-    deleteItemConfirm() {
-      this.courses.splice(this.editedIndex, 1);
-      this.closeDelete();
-    },
-
-    close() {
-      this.dialog = false;
-      this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
-        this.editedIndex = -1;
-      });
-    },
-
-    closeDelete() {
-      this.dialogDelete = false;
-      this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
-        this.editedIndex = -1;
-      });
-    },
-
-    save() {
-      if (this.editedIndex > -1) {
-        Object.assign(this.courses[this.editedIndex], this.editedItem);
-      } else {
-        this.courses.push(this.editedItem);
-      }
-      this.close();
-    },
+  },
+  created() {
+    this.getAllStudent();
   },
 };
 </script>

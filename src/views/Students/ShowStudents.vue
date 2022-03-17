@@ -4,6 +4,7 @@
     <v-row class="mt-3">
       <v-col>
         <v-data-table
+          :loading="isLoading"
           :headers="headers"
           :items="students"
           sort-by="username"
@@ -72,7 +73,7 @@
       </v-col>
     </v-row>
 
-    <v-row justify="center">
+    <!-- <v-row justify="center">
       <v-dialog v-model="dialog" scrollable max-width="1000px">
         <v-card>
           <v-card-title
@@ -81,7 +82,10 @@
               color="success"
               dark
               class="ml-3"
-              :to="{ name: 'RegisterSubject', params: { stdId: stdId } }"
+              :to="{
+                name: 'RegisterSubject',
+                params: { stdId: stdId },
+              }"
             >
               ลงทะเบียน
             </v-btn></v-card-title
@@ -121,7 +125,7 @@
               <template v-slot:item.finishDate="{ item }">
                 <v-chip
                   :class="[
-                    isFinish(item.finishDate) === 'สำเร็จการศึกษา'
+                    isFinish(item.finishDate) === 'ผ่านการทดสอบ'
                       ? 'primary'
                       : 'warning',
                   ]"
@@ -132,29 +136,6 @@
 
               <template v-slot:no-data> ไม่พบประวัติการลงทะเบียน </template>
             </v-data-table>
-            <!-- <v-row
-              class="mt-2"
-              cols="12"
-              v-for="(subject, index) in subjects"
-              :key="subject.subjectId"
-            >
-              <v-col cols="12"
-                ><h6>
-                  {{ index + 1 }}. {{ subject.subjectName }} | วันที่สมัคร
-                  {{ toThaiDateString(new Date(subject.regisDate)) }}
-                  | สถานะ
-                  <v-chip
-                    :class="[
-                      isFinish(subject.finishDate) === 'สำเร็จการศึกษา'
-                        ? 'primary'
-                        : 'warning',
-                    ]"
-                  >
-                    {{ isFinish(subject.finishDate) }}
-                  </v-chip>
-                </h6>
-              </v-col>
-            </v-row> -->
           </v-card-text>
           <v-divider></v-divider>
           <v-card-actions>
@@ -164,7 +145,7 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
-    </v-row>
+    </v-row> -->
   </v-container>
 </template>
 
@@ -174,16 +155,10 @@ import "@/mixins/generalMixin";
 export default {
   name: "ShowStudents",
   data: () => ({
+    isLoading: false,
     search: "",
     stdId: null,
     dialog: false,
-    subjectHeaders: [
-      { text: "ลำดับที่", value: "index", sortable: false },
-      { text: "วันที่ลงทะเบียน", value: "regisDate" },
-      { text: "หลักสูตรที่ลงทะเบียน", value: "subjectName" },
-      { text: "สถานะ", value: "finishDate" },
-      { text: "จุดประสงค์การเรียน", value: "objective" },
-    ],
     headers: [
       { text: "ลำดับที่", value: "index", sortable: false },
       {
@@ -226,11 +201,6 @@ export default {
         name: "StudentLog",
         query: { stdId: item.stdId },
       });
-    },
-
-    isFinish(finishDate) {
-      const status = finishDate !== null ? "สำเร็จการศึกษา" : "กำลังศึกษา";
-      return status;
     },
 
     deleteStudent(item) {
@@ -310,37 +280,25 @@ export default {
     },
 
     watchSubject(item) {
-      const jsonData = JSON.stringify({ stdId: item.stdId });
-
-      this.$http
-        .post(
-          `${process.env.VUE_APP_API_PATH}/student/getAllStdSubject.php`,
-          jsonData
-        )
-        .then((res) => {
-          this.stdId = item.stdId;
-          this.dialog = true;
-          if (res.data.message === "ไม่พบข้อมูล") {
-            this.subjects = [];
-          } else {
-            this.subjects = res.data;
-          }
-          console.log("subjects", this.subjects);
-        })
-        .catch((err) => {
-          this.isLoading = false;
-          console.log(err);
-        });
+      console.log(item);
+      this.$router.push({
+        name: "StudentSubject",
+        query: { stdId: item.stdId, stdName: item.fullName },
+      });
     },
 
     getAllStudent() {
+      this.isLoading = true;
+
       this.$http
         .get(`${process.env.VUE_APP_API_PATH}/student/getAllStudent.php`)
         .then((res) => {
+          this.isLoading = false;
           this.students = res.data;
           console.log("students", this.students);
         })
         .catch((err) => {
+          this.isLoading = false;
           console.log(err);
         });
     },

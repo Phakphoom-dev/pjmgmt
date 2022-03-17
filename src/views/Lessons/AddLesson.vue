@@ -1,6 +1,6 @@
 <template>
   <v-container fluid class="mt-3">
-    <v-btn color="info" @click="$router.go(-1)" class="mr-2"
+    <v-btn color="info" @click="$router.push('subject-lesson')" class="mr-2"
       ><v-icon small class="mr-1">mdi-arrow-left</v-icon> ย้อนกลับ</v-btn
     >
     <v-card class="mt-3">
@@ -453,7 +453,10 @@ export default {
               this.isLoading = false;
               console.log(res);
               if (res.data.isSuccess) {
-                this.$router.push({ name: "ShowLessons" });
+                this.$router.push({
+                  name: "ShowLessons",
+                  query: { subjectId: this.$route.query.subjectId },
+                });
               }
             })
             .catch((err) => {
@@ -479,6 +482,7 @@ export default {
   async created() {
     this.subjects = await this.get("/subject/getAllSubject.php");
     this.getVideoList();
+    this.lessonForm.subjectId = parseInt(this.$route.query.subjectId);
   },
 };
 </script>

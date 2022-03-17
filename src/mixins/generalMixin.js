@@ -5,7 +5,7 @@ Vue.mixin({
     formatBytes(bytes, decimals = 2) {
       if (bytes === 0) return "0 Bytes";
 
-      const k = 1000;
+      const k = 1024;
       const dm = decimals < 0 ? 0 : decimals;
       const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
 
@@ -37,17 +37,16 @@ Vue.mixin({
       let minutes = date.getMinutes().toString().padStart(2, "0");
       let second = date.getSeconds().toString().padStart(2, "0");
 
-      return (
-        `${numOfDay} ${month} ${year} ` + `${hour}:${minutes}:${second} น.`
-      );
+      return `${numOfDay} ${month} ${year} ` + `${hour}:${minutes}:${second} น.`;
+    },
+    filePath(file, folder) {
+      return `${process.env.VUE_APP_IMG_PATH}/${folder}/${file}`;
     },
     imgPath(img, folder) {
       return `${process.env.VUE_APP_IMG_PATH}/${folder}/${img}`;
     },
     async get(path) {
-      const data = await this.$http
-        .get(`${process.env.VUE_APP_API_PATH}${path}`)
-        .catch((err) => console.log(err));
+      const data = await this.$http.get(`${process.env.VUE_APP_API_PATH}${path}`).catch((err) => console.log(err));
       return data.data;
     },
     async post(path, formData) {

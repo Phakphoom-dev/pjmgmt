@@ -48,6 +48,7 @@ import ShowNews from "@/views/News/ShowNews.vue";
 import ShowReports from "@/views/Reports/ShowReports.vue";
 import VisitReport from "@/views/Reports/VisitReport.vue";
 import QuizReport from "@/views/Reports/QuizReport.vue";
+import SubjectReport from "@/views/Reports/SubjectReport.vue";
 import ExamReport from "@/views/Reports/ExamReport.vue";
 import ShowStudents from "@/views/Students/ShowStudents.vue";
 import StudentLog from "@/views/Students/StudentLog.vue";
@@ -62,6 +63,12 @@ import AddSlide from "@/views/Settings/AddSlide.vue";
 import EditSlide from "@/views/Settings/EditSlide.vue";
 import SuperSettings from "@/views/SuperSettings/SuperSettings.vue";
 import SuperSettingsIndex from "@/views/SuperSettings/SuperSettingsIndex.vue";
+import SubjectLesson from "@/views/Lessons/SubjectLesson.vue";
+import StudentSubject from "@/views/Students/StudentSubject.vue";
+import EditStudentSubject from "@/views/Students/EditStudentSubject.vue";
+import LessonList from "@/views/Reports/LessonList.vue";
+import ViewScore from "@/views/Reports/ViewScore.vue";
+import ViewExamScore from "@/views/Reports/ViewExamScore.vue";
 
 Vue.use(VueRouter);
 
@@ -215,12 +222,23 @@ const routes = [
         path: "lessons",
         name: "Lessons",
         component: Lessons,
-        redirect: "lessons/showlessons",
+        redirect: "lessons/subject-lesson",
         children: [
+          {
+            path: "subject-lesson",
+            name: "SubjectLesson",
+            component: SubjectLesson,
+          },
           {
             path: "showlessons",
             name: "ShowLessons",
             component: ShowLessons,
+            beforeEnter: (to, from, next) => {
+              if (!to.query.subjectId) {
+                next("/lessons/subject-lesson");
+              }
+              next();
+            },
           },
           {
             path: "addlesson",
@@ -351,6 +369,26 @@ const routes = [
             component: QuizReport,
           },
           {
+            path: "subjectreport",
+            name: "SubjectReport",
+            component: SubjectReport,
+          },
+          {
+            path: "lessonList",
+            name: "LessonList",
+            component: LessonList,
+          },
+          {
+            path: "viewscore",
+            name: "ViewScore",
+            component: ViewScore,
+          },
+          {
+            path: "viewexamscore",
+            name: "ViewExamScore",
+            component: ViewExamScore,
+          },
+          {
             path: "Examreport",
             name: "ExamReport",
             component: ExamReport,
@@ -367,6 +405,16 @@ const routes = [
             path: "showstudents",
             name: "ShowStudents",
             component: ShowStudents,
+          },
+          {
+            path: "student-subject",
+            name: "StudentSubject",
+            component: StudentSubject,
+          },
+          {
+            path: "edit-student-subject",
+            name: "EditStudentSubject",
+            component: EditStudentSubject,
           },
           {
             path: "addstudent",

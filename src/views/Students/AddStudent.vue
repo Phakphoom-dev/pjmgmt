@@ -208,23 +208,17 @@
                 </v-col>
 
                 <v-col cols="12" lg="4" xs="12">
-                  <validation-provider
-                    v-slot="{ errors }"
-                    name="Line ID"
-                    rules="required"
-                  >
-                    <v-text-field
-                      type="text"
-                      prepend-icon="mdi-account-box-multiple"
-                      dense
-                      outlined
-                      maxlength="100"
-                      v-model="userForm.lineId"
-                      :error-messages="errors"
-                      label="Line ID"
-                      required
-                    ></v-text-field>
-                  </validation-provider>
+                  <v-text-field
+                    type="text"
+                    prepend-icon="mdi-account-box-multiple"
+                    dense
+                    outlined
+                    maxlength="100"
+                    v-model="userForm.lineId"
+                    :error-messages="errors"
+                    label="Line ID"
+                    required
+                  ></v-text-field>
                 </v-col>
               </v-row>
 

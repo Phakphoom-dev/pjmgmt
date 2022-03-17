@@ -26,7 +26,7 @@
           <template v-slot:top>
             <v-toolbar flat>
               <v-toolbar-title>
-                <v-btn color="info" @click="$router.go(-1)" class="mr-2"
+                <v-btn color="info" @click="backPage()" class="mr-2"
                   ><v-icon small class="mr-1">mdi-arrow-left</v-icon>
                   ย้อนกลับ</v-btn
                 ></v-toolbar-title
@@ -112,10 +112,10 @@
           </template>
 
           <template v-slot:item.actions="{ item }">
-            <v-icon small class="mr-2" @click="editQuiz(item)" color="info">
+            <v-icon class="mr-2" @click="editQuiz(item)" color="info">
               mdi-pencil
             </v-icon>
-            <v-icon small @click="deleteQuiz(item)" color="error">
+            <v-icon @click="deleteQuiz(item)" color="error">
               mdi-delete
             </v-icon>
           </template>
@@ -136,6 +136,7 @@ export default {
     dialogDelete: false,
     headers: [
       { text: "ลำดับที่", value: "index" },
+      { text: "quizId", value: "quizId", align: " d-none" },
       { text: "คำถาม", value: "question" },
       { text: "ใช้เป็นแบบทดสอบ", value: "isExam" },
       { text: "แก้ไข/ลบ", value: "actions", sortable: false },
@@ -168,6 +169,17 @@ export default {
   },
 
   methods: {
+    backPage() {
+      this.$router.push({
+        name: "QuizLesson",
+        query: {
+          lessonId: this.$route.query.lessonId,
+          subjectId: this.$route.query.subjectId,
+          subjectName: this.$route.query.subjectName,
+        },
+      });
+    },
+
     changeQuizSta(isExam, quizId, index) {
       let quizStatus = null;
       isExam ? (quizStatus = 1) : (quizStatus = 0);
@@ -203,11 +215,13 @@ export default {
         query: {
           lessonId: this.$route.query.lessonId,
           subjectId: this.$route.query.subjectId,
+          subjectName: this.$route.query.subjectName,
         },
       });
     },
 
     getData() {
+      this.isLoading = true;
       this.lessonId = this.$route.query.lessonId;
 
       const jsonData = JSON.stringify({
@@ -219,19 +233,25 @@ export default {
         this.quizs = res.data;
         console.log("quiz", this.quizs);
       });
+      this.isLoading = false;
     },
 
     editQuiz(item) {
       this.$router.push({
         name: "QuizEdit",
-        query: { quizId: item.quizId },
+        query: {
+          quizId: item.quizId,
+          quizType: item.quizType,
+          subjectId: this.$route.query.subjectId,
+          lessonId: this.$route.query.lessonId,
+        },
       });
     },
 
     deleteQuiz(quiz) {
       this.$swal
         .fire({
-          title: `ต้องการลบแบบทดสอบหรือไม่หรือไม่`,
+          title: `ต้องการลบแบบฝึกหัดหรือไม่`,
           showDenyButton: true,
           confirmButtonText: "ยืนยัน",
           denyButtonText: `ยกเลิก`,
@@ -301,6 +321,7 @@ export default {
   },
 
   created() {
+    console.log(this.$route.query);
     this.getData();
   },
 };

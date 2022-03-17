@@ -97,7 +97,9 @@
           <template v-slot:item.loginTime="{ item }">
             {{
               item.logType === "login"
-                ? toThaiDateString(new Date(item.logTime))
+                ? toThaiDateString(
+                    new Date(item.logTime.replace(/\s/, "T") + "Z")
+                  )
                 : "-"
             }}
           </template>
@@ -105,7 +107,9 @@
           <template v-slot:item.logoutTime="{ item }">
             {{
               item.logType === "logout"
-                ? toThaiDateString(new Date(item.logTime))
+                ? toThaiDateString(
+                    new Date(item.logTime.replace(/\s/, "T") + "Z")
+                  )
                 : "-"
             }}
           </template>

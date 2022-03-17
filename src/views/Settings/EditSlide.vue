@@ -38,45 +38,32 @@
               </v-row>
 
               <v-row no-gutters>
-                <v-col cols="12" lg="4" xs="12">
-                  <validation-provider
-                    v-slot="{ errors }"
-                    name="หัวข้อ"
-                    rules="required"
-                  >
-                    <v-text-field
-                      type="text"
-                      prepend-icon="mdi-book"
-                      dense
-                      outlined
-                      v-model="slideForm.slideTitle"
-                      :error-messages="errors"
-                      label="หัวข้อ"
-                      required
-                    ></v-text-field>
-                  </validation-provider>
+                <v-col cols="12" xs="12">
+                  <v-text-field
+                    type="text"
+                    prepend-icon="mdi-book"
+                    dense
+                    outlined
+                    v-model="slideForm.slideTitle"
+                    :error-messages="errors"
+                    label="หัวข้อ"
+                    required
+                  ></v-text-field>
                 </v-col>
               </v-row>
 
               <v-row no-gutters>
-                <v-col cols="12" lg="4" xs="12">
-                  <validation-provider
-                    v-slot="{ errors }"
-                    name="รายละเอียด"
-                    rules="required"
-                  >
-                    <v-textarea
-                      type="text"
-                      prepend-icon="mdi-format-align-justify"
-                      dense
-                      outlined
-                      maxlength="20"
-                      v-model="slideForm.slideDesc"
-                      :error-messages="errors"
-                      label="รายละเอียด"
-                      required
-                    ></v-textarea>
-                  </validation-provider>
+                <v-col cols="12" xs="12">
+                  <v-textarea
+                    type="text"
+                    prepend-icon="mdi-format-align-justify"
+                    dense
+                    outlined
+                    v-model="slideForm.slideDesc"
+                    :error-messages="errors"
+                    label="รายละเอียด"
+                    required
+                  ></v-textarea>
                 </v-col>
               </v-row>
 
@@ -103,7 +90,7 @@
 import {
   extend,
   ValidationObserver,
-  ValidationProvider,
+  // ValidationProvider,
   setInteractionMode,
 } from "vee-validate";
 import { confirmed, email } from "vee-validate/dist/rules";
@@ -124,7 +111,7 @@ export default {
   name: "AddSlide",
   components: {
     ValidationObserver,
-    ValidationProvider,
+    // ValidationProvider,
   },
   data: () => ({
     isLoading: false,

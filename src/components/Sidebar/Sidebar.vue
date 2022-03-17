@@ -108,7 +108,7 @@ export default {
         {
           title: "รายงาน",
           icon: "mdi-chart-bar",
-          link: "/#",
+          link: "/reports",
         },
         {
           title: "จัดการสไลด์โชว์",
@@ -166,17 +166,12 @@ export default {
           {
             title: "แบบทดสอบ",
             icon: "mdi-head-question",
-            link: "/exams",
+            link: "/test",
           },
           {
             title: "รายงาน",
             icon: "mdi-chart-bar",
             link: "/reports",
-          },
-          {
-            title: "จัดการติดต่อเรา",
-            icon: "mdi-contact",
-            link: "/contact",
           },
         ];
       }

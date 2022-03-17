@@ -61,6 +61,7 @@
 export default {
   name: "ShowTeachers",
   data: () => ({
+    isLoading: false,
     search: "",
     headers: [
       { text: "ลำดับที่", value: "index" },
@@ -117,9 +118,11 @@ export default {
     },
 
     getAllTeacher() {
+      this.isLoading = true;
       this.$http
         .get(`${process.env.VUE_APP_API_PATH}/user/getAllAdmin.php`)
         .then((res) => {
+          this.isLoading = false;
           this.teachers = res.data;
           this.teachers = this.teachers.filter((teacher) => {
             return teacher.role === "teacher";

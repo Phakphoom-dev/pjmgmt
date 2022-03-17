@@ -1,7 +1,10 @@
 <template>
   <v-container fluid class="mt-3">
     <v-row class="mt-2" no-gutters>
-      <h3>รายงาน การทำแบบฝึกหัด</h3>
+      <h3>
+        รายงาน
+        {{ pageTitle }}
+      </h3>
     </v-row>
 
     <!-- <v-row>
@@ -18,100 +21,34 @@
       <v-col>
         <v-data-table
           :headers="headers"
-          :items="courses"
-          sort-by="username"
+          :items="scoreData"
+          sort-by="subjectId"
           class="elevation-1"
         >
           <template v-slot:top>
             <v-toolbar flat>
+              <v-btn color="info" @click="$router.go(-1)" class="mr-3"
+                ><v-icon small class="mr-1">mdi-arrow-left</v-icon>
+                ย้อนกลับ</v-btn
+              >
               <v-toolbar-title
-                >ข้อมูลการเข้าใช้งานระบบ - ทดสอบ ผู้ใช้งาน</v-toolbar-title
+                >{{ pageTitle }} - {{ $route.query.stdName }}</v-toolbar-title
               >
               <v-divider class="mx-4" inset vertical></v-divider>
               <v-spacer></v-spacer>
-              <v-dialog v-model="dialog" max-width="500px">
-                <v-card>
-                  <v-card-title>
-                    <span class="text-h5">{{ formTitle }}</span>
-                  </v-card-title>
-
-                  <v-card-text>
-                    <v-container>
-                      <v-row>
-                        <v-col cols="12" sm="6" md="4">
-                          <v-text-field
-                            v-model="editedItem.courseName"
-                            label="ชื่อหลักสูตร"
-                          ></v-text-field>
-                        </v-col>
-                        <v-col cols="12" sm="6" md="4">
-                          <v-switch
-                            v-model="editedItem.active"
-                            color="success"
-                            :error="!editedItem.active"
-                            label="การใช้งาน"
-                          ></v-switch>
-                        </v-col>
-                      </v-row>
-                    </v-container>
-                  </v-card-text>
-
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="blue darken-1" text @click="close">
-                      ยกเลิก
-                    </v-btn>
-                    <v-btn color="blue darken-1" text @click="save">
-                      ยืนยัน
-                    </v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
-              <v-dialog v-model="dialogDelete" max-width="500px">
-                <v-card>
-                  <v-card-title class="text-h5"
-                    >ต้องการลบผู้สอนหรือไม่ ?</v-card-title
-                  >
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="blue darken-1" text @click="closeDelete"
-                      >ยกเลิก</v-btn
-                    >
-                    <v-btn color="blue darken-1" text @click="deleteItemConfirm"
-                      >ยืนยัน</v-btn
-                    >
-                    <v-spacer></v-spacer>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
             </v-toolbar>
           </template>
           <template slot="item.index" scope="props">
             {{ props.index + 1 }}
           </template>
 
-          <template v-slot:item.registeredDate="{}">
-            {{ new Date() | moment("DD/MM/YYYY HH:mm:ss") }}
+          <template v-slot:item.actions="{ item }">
+            <v-icon class="mr-2" @click="toLessonLog(item)" color="info">
+              mdi-text-box-outline
+            </v-icon>
           </template>
 
-          <template v-slot:item.active="{ item }">
-            <div>
-              <v-switch
-                v-model="item.active"
-                color="success"
-                :error="!item.active"
-                dense
-              ></v-switch>
-            </div>
-          </template>
-
-          <template v-slot:item.result="{ item }">
-            <v-chip class="ma-2" :color="item.result ? 'success' : 'error'">
-              {{ item.result ? "ผ่าน" : "ไม่ผ่าน" }}
-            </v-chip>
-          </template>
-
-          <template v-slot:no-data> ไม่พบผู้สอน </template>
+          <template v-slot:no-data> ไม่พบหลักสูตรของผู้เรียน </template>
         </v-data-table>
       </v-col>
     </v-row>
@@ -120,19 +57,17 @@
 
 <script>
 export default {
-  name: "VisitReport",
+  name: "QuizReport",
   data: () => ({
+    stdId: null,
     dialog: false,
     dialogDelete: false,
+    scoreData: [],
     headers: [
       { text: "ลำดับที่", value: "index" },
-      { text: "ชื่อบทเรียน", value: "lessonName" },
-      { text: "ผู้เรียน", value: "fullname" },
-      { text: "วันที่ทำ", value: "doDate" },
-      { text: "เวลาที่สอบ", value: "startTime" },
-      { text: "คะแนนเต็ม", value: "maxScore" },
-      { text: "คะแนนที่ได้", value: "getScore" },
-      { text: "ผลการสอบ", value: "result" },
+      { text: "subjectId", value: "subjectId", align: " d-none" },
+      { text: "ชื่อหลักสูตร", value: "subjectName" },
+      { text: "ดูรายการทำแบบฝึกหัด", value: "actions" },
     ],
     courses: [],
     editedIndex: -1,
@@ -150,6 +85,11 @@ export default {
     formTitle() {
       return this.editedIndex === -1 ? "เพิ่มหลักสูตร" : "แก้ไขหลักสูตร";
     },
+    pageTitle() {
+      return this.$route.query.action === "exam"
+        ? "การทำแบบทดสอบ"
+        : "การทำแบบฝึกหัด";
+    },
   },
 
   watch: {
@@ -160,33 +100,27 @@ export default {
       val || this.closeDelete();
     },
   },
-
-  created() {
-    this.initialize();
-  },
-
   methods: {
-    initialize() {
-      this.courses = [
-        {
-          lessonName: "บทที่ 1 Basic Grammar",
-          fullname: "ทดสอบ ผู้ใช้งาน",
-          doDate: "14/11/2021",
-          startTime: "23:46:00",
-          maxScore: "10",
-          getScore: "7",
-          result: true,
-        },
-        {
-          lessonName: "บทที่ 1 Basic Grammar",
-          fullname: "ทดสอบ ผู้ใช้งาน",
-          doDate: "14/11/2021",
-          startTime: "23:46:00",
-          maxScore: "10",
-          getScore: "4",
-          result: false,
-        },
-      ];
+    toLessonLog(item) {
+      if (this.$route.query.action === "exam") {
+        this.$router.push({
+          name: "ViewExamScore",
+          query: {
+            stdId: this.stdId,
+            stdName: this.$route.query.stdName,
+            subjectId: item.subjectId,
+          },
+        });
+      } else {
+        this.$router.push({
+          name: "LessonList",
+          query: {
+            stdId: this.stdId,
+            stdName: this.$route.query.stdName,
+            subjectId: item.subjectId,
+          },
+        });
+      }
     },
     visitReport() {
       this.$router.push("visitreport");
@@ -220,46 +154,31 @@ export default {
           quiz: item,
         },
       });
-      // this.editedIndex = this.courses.indexOf(item);
-      // this.editedItem = Object.assign({}, item);
-      // this.dialog = true;
     },
+    getAllStdScore() {
+      this.isLoading = true;
+      const jsonData = JSON.stringify({ stdId: this.$route.query.stdId });
 
-    deleteItem(item) {
-      this.editedIndex = this.courses.indexOf(item);
-      this.editedItem = Object.assign({}, item);
-      this.dialogDelete = true;
+      this.$http
+        .post(
+          `${process.env.VUE_APP_API_PATH}/student/getAllStdSubject.php`,
+          jsonData
+        )
+        .then((res) => {
+          this.isLoading = false;
+          console.log("getAllStdSubject", res.data);
+          this.scoreData = res.data;
+        })
+        .catch((err) => {
+          this.isLoading = false;
+          console.log(err);
+        });
     },
-
-    deleteItemConfirm() {
-      this.courses.splice(this.editedIndex, 1);
-      this.closeDelete();
-    },
-
-    close() {
-      this.dialog = false;
-      this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
-        this.editedIndex = -1;
-      });
-    },
-
-    closeDelete() {
-      this.dialogDelete = false;
-      this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
-        this.editedIndex = -1;
-      });
-    },
-
-    save() {
-      if (this.editedIndex > -1) {
-        Object.assign(this.courses[this.editedIndex], this.editedItem);
-      } else {
-        this.courses.push(this.editedItem);
-      }
-      this.close();
-    },
+  },
+  created() {
+    console.log("QuizReport", this.$route.query);
+    this.stdId = this.$route.query.stdId;
+    this.getAllStdScore();
   },
 };
 </script>

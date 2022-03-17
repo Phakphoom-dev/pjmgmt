@@ -17,15 +17,25 @@
     <v-row class="mt-3">
       <v-col>
         <v-data-table
+          :loading="isLoading"
           :headers="headers"
           :items="subjects"
           sort-by="username"
           class="elevation-1"
+          :search="search"
         >
           <template v-slot:top>
             <v-toolbar flat>
               <v-toolbar-title>จัดการแบบฝึกหัด</v-toolbar-title>
               <v-divider class="mx-4" inset vertical></v-divider>
+              <v-text-field
+                v-model="search"
+                append-icon="mdi-magnify"
+                label="ค้นหาแบบทดสอบ"
+                single-line
+                hide-details
+              ></v-text-field>
+              <v-spacer></v-spacer>
               <v-spacer></v-spacer>
               <v-dialog v-model="dialog" max-width="500px">
                 <v-card>
@@ -104,7 +114,7 @@
               mdi-pencil
             </v-icon>
           </template>
-          <template v-slot:no-data> ไม่พบหลักสูตร </template>
+          <template v-slot:no-data> ไม่พบแบบฝึกหัด </template>
         </v-data-table>
       </v-col>
     </v-row>
@@ -115,15 +125,20 @@
 export default {
   name: "ShowQuizs",
   data: () => ({
+    search: "",
+    isLoading: false,
     dialog: false,
     dialogDelete: false,
     headers: [
       { text: "ลำดับที่", value: "index" },
-      { text: "รายวิชา", value: "subjectName" },
+      { text: "หลักสูตรหลัก", value: "courseName" },
+      { text: "หลักสูตร", value: "subjectName" },
       { text: "จำนวนบทเรียน", value: "lessonAmount" },
+      { text: "จำนวนแบบฝึกหัด", value: "quizAmount" },
       { text: "จัดการ", value: "actions", sortable: false },
     ],
     subjects: [],
+    lessons: [],
     editedIndex: -1,
     editedItem: {
       subjectName: "",
@@ -151,11 +166,6 @@ export default {
   },
 
   methods: {
-    async getData() {
-      this.subjects = await this.get("/subject/getAllSubject.php");
-      console.log(this.subjects);
-    },
-
     editItem(item) {
       console.log(item);
       this.$router.push({
@@ -202,10 +212,61 @@ export default {
       }
       this.close();
     },
+
+    getAllLesson() {
+      const data = this.post("/lesson/getAllLesson.php");
+      data.then((res) => {
+        this.lessons = res.data;
+        console.log("getAllLesson", res.data);
+      });
+    },
+
+    async getData() {
+      let userData = JSON.parse(localStorage.getItem("userData"));
+
+      this.subjects = await this.get("/subject/getAllSubject.php");
+
+      if (userData.role === "teacher") {
+        let subjectIds = localStorage.getItem("subjectIds");
+
+        if (subjectIds) {
+          subjectIds = subjectIds.split(",");
+        }
+        subjectIds = subjectIds.map((subject) => {
+          return parseInt(subject);
+        });
+
+        let arr = [];
+
+        this.subjects = subjectIds.map((subjectId) => {
+          this.subjects.filter((subject) => {
+            if (subject.subjectId === subjectId) {
+              arr.push(subject);
+            }
+          });
+        });
+
+        this.subjects = arr;
+      }
+
+      this.lessons = this.lessons.filter((lesson) => lesson.quizAmount > 0);
+
+      this.subjects.map((subject, index) => {
+        this.subjects[index].quizAmount = 0;
+        this.lessons.map((lesson) => {
+          if (parseInt(subject.subjectId) === parseInt(lesson.subjectId)) {
+            this.subjects[index].quizAmount += lesson.quizAmount;
+          }
+        });
+      });
+
+      console.log(this.subjects);
+    },
   },
 
-  created() {
-    this.getData();
+  async created() {
+    await this.getAllLesson();
+    await this.getData();
   },
 };
 </script>

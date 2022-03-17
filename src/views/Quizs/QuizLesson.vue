@@ -19,13 +19,16 @@
         <v-data-table
           :headers="headers"
           :items="lessons"
-          sort-by="username"
+          sort-by="lessonId"
           class="elevation-1"
         >
           <template v-slot:top>
             <v-toolbar flat>
               <v-toolbar-title>
-                <v-btn color="info" @click="$router.go(-1)" class="mr-2"
+                <v-btn
+                  color="info"
+                  @click="$router.push('showquizs')"
+                  class="mr-2"
                   ><v-icon small class="mr-1">mdi-arrow-left</v-icon>
                   ย้อนกลับ</v-btn
                 ></v-toolbar-title
@@ -126,6 +129,7 @@ export default {
     dialogDelete: false,
     headers: [
       { text: "ลำดับที่", value: "index" },
+      { text: "lessonId", value: "lessonId", align: " d-none" },
       { text: "ชื่อบทเรียน", value: "lessonName" },
       { text: "จำนวนข้อ", value: "quizAmount" },
       { text: "จัดการแบบฝึกหัด", value: "actions", sortable: false },
@@ -164,7 +168,7 @@ export default {
         query: {
           lessonId: item.lessonId,
           subjectId: item.subjectId,
-          lessonName: item.lessonName,
+          subjectName: this.$route.query.subjectName,
         },
       });
       // this.editedIndex = this.lessons.indexOf(item);
@@ -223,9 +227,9 @@ export default {
     },
   },
 
-  created() {
+  async created() {
     console.log("QuizLesson", this.$route.query);
-    this.getData();
+    await this.getData();
   },
 };
 </script>

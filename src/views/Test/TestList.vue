@@ -105,10 +105,13 @@
             </div>
           </template>
 
-          <template v-slot:item.actions="{ item }">
-            <v-icon small class="mr-2" @click="editQuiz(item)" color="info">
-              mdi-pencil
-            </v-icon>
+          <template v-slot:item.actions="{ item, index }">
+            <v-switch
+              v-model="item.isExam"
+              color="success"
+              dense
+              @change="changeQuizSta(item.isExam, item.quizId, index)"
+            ></v-switch>
           </template>
           <template v-slot:no-data> ไม่พบแบบฝึกหัดของบทเรียนนี้ </template>
         </v-data-table>
@@ -128,7 +131,7 @@ export default {
     headers: [
       { text: "ลำดับที่", value: "index" },
       { text: "คำถาม", value: "question" },
-      { text: "แก้ไข/ลบ", value: "actions", sortable: false },
+      { text: "ยกเลิก", value: "actions", sortable: false },
     ],
     courses: [],
     editedIndex: -1,
@@ -159,6 +162,7 @@ export default {
 
   methods: {
     changeQuizSta(isExam, quizId, index) {
+      console.log(isExam, quizId);
       let quizStatus = null;
       isExam ? (quizStatus = 1) : (quizStatus = 0);
 
@@ -212,9 +216,15 @@ export default {
     },
 
     editQuiz(item) {
+      console.log(item);
       this.$router.push({
         name: "QuizEdit",
-        query: { quizId: item.quizId },
+        query: {
+          quizId: item.quizId,
+          lessonId: item.lessonId,
+          subjectId: this.$route.query.subjectId,
+          quizType: item.quizType,
+        },
       });
     },
 
@@ -291,6 +301,8 @@ export default {
   },
 
   created() {
+    console.log(this.$route.query);
+
     this.getData();
   },
 };

@@ -77,7 +77,6 @@ export default {
   name: "ShowCourses",
   data: () => ({
     search: "",
-    isLoading: false,
     dialog: false,
     dialogDelete: false,
     headers: [
@@ -111,6 +110,7 @@ export default {
 
   methods: {
     getAllCourse() {
+      this.isLoading = true;
       this.$http
         .get(`${process.env.VUE_APP_API_PATH}/course/getAllCourse.php`)
         .then((res) => {
@@ -149,7 +149,6 @@ export default {
           }
         })
         .catch((err) => {
-          this.isLoading = false;
           this.$toast.open({
             message: err.response.data.message,
             type: "warning",
@@ -185,7 +184,6 @@ export default {
                 }
               })
               .catch((err) => {
-                this.isLoading = false;
                 console.log(err.response.data);
                 this.$swal({
                   icon: "error",

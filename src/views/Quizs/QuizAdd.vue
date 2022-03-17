@@ -18,7 +18,7 @@
           @click="activeButton = 'text'"
           class="ml-3"
           ><v-icon small class="mr-1">mdi-file-document-edit-outline</v-icon>
-          แบบกรอกคำ</v-btn
+          แบบเติมคำ</v-btn
         >
       </v-card-title>
       <v-card-text v-if="activeButton === 'choice'">
@@ -26,12 +26,7 @@
           <v-form @submit.prevent="submit">
             <v-container>
               <v-row class="mb-3" align="center" justify="center">
-                <v-img
-                  v-if="url"
-                  :src="url"
-                  max-height="300"
-                  max-width="300"
-                ></v-img>
+                <FormImage v-if="url" :src="url" />
               </v-row>
 
               <v-row no-gutters>
@@ -47,13 +42,9 @@
                 </v-col>
               </v-row>
 
-              <v-row no-gutters>
+              <v-row no-gutters v-if="questionForm.questionType === 'choice'">
                 <v-col cols="12">
-                  <validation-provider
-                    v-slot="{ errors }"
-                    name="คำถาม"
-                    rules="required"
-                  >
+                  <validation-provider v-slot="{ errors }" name="คำถาม">
                     <v-text-field
                       type="text"
                       prepend-icon="mdi-book-open"
@@ -64,19 +55,99 @@
                       :error-messages="errors"
                       label="คำถาม"
                       required
-                    ></v-text-field>
+                    >
+                      <template v-slot:append-outer>
+                        <v-icon @click="switchToSound">mdi-book-open</v-icon>
+                      </template>
+                    </v-text-field>
                   </validation-provider>
                 </v-col>
               </v-row>
 
-              <v-row no-gutters>
+              <v-row no-gutters v-if="questionForm.questionType === 'sound'">
                 <v-col cols="12">
                   <validation-provider
                     v-slot="{ errors }"
-                    name="คำตอบข้อ ก."
+                    name="ไฟล์คำถาม"
+                    rules="required"
+                  >
+                    <v-file-input
+                      accept="audio/mp3,audio/*;capture=microphone"
+                      prepend-icon="mdi-music-note"
+                      dense
+                      outlined
+                      v-model="questionForm.question2"
+                      :error-messages="errors"
+                      label="ไฟล์คำถาม"
+                      required
+                    >
+                      <template v-slot:append-outer>
+                        <v-icon @click="switchToText" color="green"
+                          >mdi-music-note</v-icon
+                        >
+                      </template>
+                    </v-file-input>
+                  </validation-provider>
+                </v-col>
+              </v-row>
+
+              <v-row no-gutters v-if="questionForm.questionType === 'sound'">
+                <v-col cols="12">
+                  <validation-provider v-slot="{ errors }" name="คำถาม">
+                    <v-text-field
+                      type="text"
+                      prepend-icon="mdi-image"
+                      dense
+                      outlined
+                      maxlength="100"
+                      v-model="questionForm.question"
+                      :error-messages="errors"
+                      label="คำถาม"
+                      required
+                    >
+                    </v-text-field>
+                  </validation-provider>
+                </v-col>
+              </v-row>
+
+              <!-- answer A -->
+              <v-row no-gutters>
+                <v-col cols="12" v-if="showA1">
+                  <v-row class="mb-3" align="center" justify="center">
+                    <FormImage v-if="a1Url" :src="a1Url" />
+                  </v-row>
+
+                  <validation-provider
+                    v-slot="{ errors }"
+                    name="รูปคำตอบข้อ a."
+                    rules="required"
+                  >
+                    <v-file-input
+                      @change="onA1Change"
+                      prepend-icon="mdi-image"
+                      accept="image/*"
+                      label="รูปคำตอบข้อ a."
+                      v-model="questionForm.a1"
+                      :error-messages="errors"
+                      dense
+                      outlined
+                    >
+                      <template v-slot:append-outer>
+                        <v-icon color="primary" @click="addImage('a')"
+                          >mdi-image-plus</v-icon
+                        >
+                      </template>
+                    </v-file-input>
+                  </validation-provider>
+                </v-col>
+                <v-col :cols="!showA1 ? 12 : 6" v-if="!showA1">
+                  <validation-provider
+                    v-slot="{ errors }"
+                    name="คำตอบข้อ a."
                     rules="required"
                   >
                     <v-text-field
+                      :class="!showA1 ? '' : 'ml-2'"
                       type="text"
                       prepend-icon="mdi-forum"
                       dense
@@ -84,21 +155,55 @@
                       maxlength="100"
                       v-model="questionForm.a"
                       :error-messages="errors"
-                      label="คำตอบข้อ ก."
+                      label="คำตอบข้อ a."
                       required
-                    ></v-text-field>
+                    >
+                      <template v-slot:append-outer>
+                        <v-icon @click="addImage('a')">mdi-image-plus</v-icon>
+                      </template>
+                    </v-text-field>
                   </validation-provider>
                 </v-col>
               </v-row>
 
+              <!-- answer B -->
               <v-row no-gutters>
-                <v-col cols="12">
+                <v-col cols="12" v-if="showB1">
+                  <v-row class="mb-3" align="center" justify="center">
+                    <FormImage v-if="b1Url" :src="b1Url" />
+                  </v-row>
+
                   <validation-provider
                     v-slot="{ errors }"
-                    name="คำตอบข้อ ข."
+                    name="รูปคำตอบข้อ b."
+                    rules="required"
+                  >
+                    <v-file-input
+                      @change="onB1Change"
+                      prepend-icon="mdi-image"
+                      accept="image/*"
+                      label="รูปคำตอบข้อ b."
+                      v-model="questionForm.b1"
+                      :error-messages="errors"
+                      dense
+                      outlined
+                    >
+                      <template v-slot:append-outer>
+                        <v-icon color="primary" @click="addImage('b')"
+                          >mdi-image-plus</v-icon
+                        >
+                      </template>
+                    </v-file-input>
+                  </validation-provider>
+                </v-col>
+                <v-col :cols="!showB1 ? 12 : 6" v-if="!showB1">
+                  <validation-provider
+                    v-slot="{ errors }"
+                    name="คำตอบข้อ b."
                     rules="required"
                   >
                     <v-text-field
+                      :class="!showB1 ? '' : 'ml-2'"
                       type="text"
                       prepend-icon="mdi-forum"
                       dense
@@ -106,21 +211,55 @@
                       maxlength="100"
                       v-model="questionForm.b"
                       :error-messages="errors"
-                      label="คำตอบข้อ ข."
+                      label="คำตอบข้อ b."
                       required
-                    ></v-text-field>
+                    >
+                      <template v-slot:append-outer>
+                        <v-icon @click="addImage('b')">mdi-image-plus</v-icon>
+                      </template>
+                    </v-text-field>
                   </validation-provider>
                 </v-col>
               </v-row>
 
+              <!-- answer C -->
               <v-row no-gutters>
-                <v-col cols="12">
+                <v-col cols="12" v-if="showC1">
+                  <v-row class="mb-3" align="center" justify="center">
+                    <FormImage v-if="c1Url" :src="c1Url" />
+                  </v-row>
+
                   <validation-provider
                     v-slot="{ errors }"
-                    name="คำตอบข้อ ค."
+                    name="รูปคำตอบข้อ c."
+                    rules="required"
+                  >
+                    <v-file-input
+                      @change="onC1Change"
+                      prepend-icon="mdi-image"
+                      accept="image/*"
+                      label="รูปคำตอบข้อ c."
+                      v-model="questionForm.c1"
+                      dense
+                      :error-messages="errors"
+                      outlined
+                    >
+                      <template v-slot:append-outer>
+                        <v-icon color="primary" @click="addImage('c')"
+                          >mdi-image-plus</v-icon
+                        >
+                      </template>
+                    </v-file-input>
+                  </validation-provider>
+                </v-col>
+                <v-col :cols="!showC1 ? 12 : 6" v-if="!showC1">
+                  <validation-provider
+                    v-slot="{ errors }"
+                    name="คำตอบข้อ c."
                     rules="required"
                   >
                     <v-text-field
+                      :class="!showC1 ? '' : 'ml-2'"
                       type="text"
                       prepend-icon="mdi-forum"
                       dense
@@ -128,21 +267,55 @@
                       maxlength="100"
                       v-model="questionForm.c"
                       :error-messages="errors"
-                      label="คำตอบข้อ ค."
+                      label="คำตอบข้อ c."
                       required
-                    ></v-text-field>
+                    >
+                      <template v-slot:append-outer>
+                        <v-icon @click="addImage('c')">mdi-image-plus</v-icon>
+                      </template>
+                    </v-text-field>
                   </validation-provider>
                 </v-col>
               </v-row>
 
+              <!-- answer D -->
               <v-row no-gutters>
-                <v-col cols="12">
+                <v-col cols="12" v-if="showD1">
+                  <v-row class="mb-3" align="center" justify="center">
+                    <FormImage v-if="d1Url" :src="d1Url" />
+                  </v-row>
+
                   <validation-provider
                     v-slot="{ errors }"
-                    name="คำตอบข้อ ง."
+                    name="รูปคำตอบข้อ d."
+                    rules="required"
+                  >
+                    <v-file-input
+                      @change="onD1Change"
+                      prepend-icon="mdi-image"
+                      accept="image/*"
+                      label="รูปคำตอบข้อ d."
+                      v-model="questionForm.d1"
+                      dense
+                      :error-messages="errors"
+                      outlined
+                    >
+                      <template v-slot:append-outer>
+                        <v-icon color="primary" @click="addImage('d')"
+                          >mdi-image-plus</v-icon
+                        >
+                      </template>
+                    </v-file-input>
+                  </validation-provider>
+                </v-col>
+                <v-col :cols="!showD1 ? 12 : 6" v-if="!showD1">
+                  <validation-provider
+                    v-slot="{ errors }"
+                    name="คำตอบข้อ d."
                     rules="required"
                   >
                     <v-text-field
+                      :class="!showC1 ? '' : 'ml-2'"
                       type="text"
                       prepend-icon="mdi-forum"
                       dense
@@ -150,9 +323,13 @@
                       maxlength="100"
                       v-model="questionForm.d"
                       :error-messages="errors"
-                      label="คำตอบข้อ ง."
+                      label="คำตอบข้อ d."
                       required
-                    ></v-text-field>
+                    >
+                      <template v-slot:append-outer>
+                        <v-icon @click="addImage('d')">mdi-image-plus</v-icon>
+                      </template>
+                    </v-text-field>
                   </validation-provider>
                 </v-col>
               </v-row>
@@ -170,10 +347,10 @@
                       :error-messages="errors"
                       row
                     >
-                      <v-radio label="ก." :value="questionForm.a"></v-radio>
-                      <v-radio label="ข." :value="questionForm.b"></v-radio>
-                      <v-radio label="ค." :value="questionForm.c"></v-radio>
-                      <v-radio label="ง." :value="questionForm.d"></v-radio>
+                      <v-radio label="a." :value="'a'"></v-radio>
+                      <v-radio label="b." :value="'b'"></v-radio>
+                      <v-radio label="c." :value="'c'"></v-radio>
+                      <v-radio label="d." :value="'d'"></v-radio>
                     </v-radio-group>
                   </validation-provider>
                 </v-col>
@@ -186,6 +363,7 @@
                   block
                   color="primary"
                   :disabled="isLoading"
+                  :loading="isLoading"
                 >
                   ยืนยัน
                 </v-btn>
@@ -214,7 +392,7 @@
                       maxlength="100"
                       v-model="textQuestion"
                       :error-messages="errors"
-                      label="ชื่อหัวข้อ"
+                      label="ระบุคำสั่ง"
                       required
                     ></v-text-field>
                   </validation-provider>
@@ -225,7 +403,7 @@
                 <v-col cols="6">
                   <validation-provider
                     v-slot="{ errors }"
-                    :name="`คำถามที่ ${index}`"
+                    name="คำถาม"
                     rules="required"
                   >
                     <v-text-field
@@ -236,7 +414,7 @@
                       maxlength="100"
                       v-model="form.question"
                       :error-messages="errors"
-                      :label="`คำถามที่ ${index}`"
+                      label="คำถาม"
                       required
                     ></v-text-field>
                   </validation-provider>
@@ -244,7 +422,7 @@
                 <v-col cols="6">
                   <validation-provider
                     v-slot="{ errors }"
-                    :name="`คำตอบที่ ${index}`"
+                    name="คำตอบ"
                     rules="required"
                   >
                     <v-text-field
@@ -256,20 +434,9 @@
                       maxlength="100"
                       v-model="form.textAnswer"
                       :error-messages="errors"
-                      :label="`คำตอบที่ ${index}`"
+                      label="คำตอบ"
                       required
                     >
-                      <template v-slot:append-outer>
-                        <v-btn
-                          v-if="index === textForm.length - 1"
-                          small
-                          outlined
-                          color="info"
-                          @click="addTextQuestion"
-                        >
-                          <v-icon color="info">mdi-plus-thick</v-icon>
-                        </v-btn>
-                      </template>
                     </v-text-field>
                   </validation-provider>
                 </v-col>
@@ -282,6 +449,7 @@
                 block
                 color="primary"
                 :disabled="isLoading"
+                :loading="isLoading"
               >
                 ยืนยัน
               </v-btn>
@@ -290,6 +458,7 @@
         </validation-observer>
       </v-card-text>
     </v-card>
+    <Loading :isLoading="isLoading" />
   </v-container>
 </template>
 
@@ -300,7 +469,9 @@ import {
   ValidationProvider,
   setInteractionMode,
 } from "vee-validate";
-import { required } from "vee-validate/dist/rules";
+import { required, is_not } from "vee-validate/dist/rules";
+import FormImage from "@/components/Form/FormImage";
+import Loading from "@/components/Loading";
 
 setInteractionMode("eager");
 
@@ -309,16 +480,30 @@ extend("required", {
   message: "กรุณากรอก {_field_}",
 });
 
+extend("is_not", {
+  ...is_not,
+});
+
 export default {
   name: "QuizAdd",
   components: {
     ValidationProvider,
     ValidationObserver,
+    FormImage,
+    Loading,
   },
   data: () => ({
+    showA1: false,
+    showB1: false,
+    showC1: false,
+    showD1: false,
     activeButton: "choice",
     isLoading: false,
     url: null,
+    a1Url: null,
+    b1Url: null,
+    c1Url: null,
+    d1Url: null,
     valid: true,
     textQuestion: "",
     textForm: [
@@ -328,11 +513,17 @@ export default {
       },
     ],
     questionForm: {
+      questionType: "choice",
       question: "",
+      question2: "",
       a: "",
+      a1: null,
       b: "",
+      b1: null,
       c: "",
+      c1: null,
       d: "",
+      d1: null,
       answer: "",
       questionImg: null,
       lessonId: "",
@@ -340,6 +531,41 @@ export default {
     },
   }),
   methods: {
+    addImage(input) {
+      switch (input) {
+        case "a":
+          this.questionForm.a = "";
+          this.showA1 = !this.showA1;
+          break;
+        case "b":
+          this.questionForm.b = "";
+          this.showB1 = !this.showB1;
+          break;
+        case "c":
+          this.questionForm.c = "";
+          this.showC1 = !this.showC1;
+          break;
+        case "d":
+          this.questionForm.d = "";
+          this.showD1 = !this.showD1;
+          break;
+      }
+    },
+
+    switchToSound() {
+      this.questionForm.question = null;
+      this.questionForm.questionType = "sound";
+    },
+
+    switchToText() {
+      this.questionForm.question = null;
+      this.questionForm.questionType = "choice";
+    },
+
+    removeTextQuestion(index) {
+      this.textForm.splice(index, 1);
+    },
+
     addTextQuestion() {
       this.textForm.push({
         question: "",
@@ -349,6 +575,38 @@ export default {
 
     showTextQuiz(type) {
       this.activeButton = type;
+    },
+
+    onA1Change(e) {
+      if (e) {
+        this.a1Url = URL.createObjectURL(e);
+      } else {
+        this.a1Url = null;
+      }
+    },
+
+    onB1Change(e) {
+      if (e) {
+        this.b1Url = URL.createObjectURL(e);
+      } else {
+        this.b1Url = null;
+      }
+    },
+
+    onC1Change(e) {
+      if (e) {
+        this.c1Url = URL.createObjectURL(e);
+      } else {
+        this.c1Url = null;
+      }
+    },
+
+    onD1Change(e) {
+      if (e) {
+        this.d1Url = URL.createObjectURL(e);
+      } else {
+        this.d1Url = null;
+      }
     },
 
     onFileChange(e) {
@@ -396,16 +654,50 @@ export default {
 
     async submit() {
       const isValid = await this.$refs.observer.validate();
-
       if (isValid) {
+        if (
+          this.questionForm.questionType === "choice" ||
+          this.questionForm.questionType === "text"
+        ) {
+          if (this.questionForm.question.includes(".")) {
+            this.$swal.fire({
+              icon: "info",
+              title: "ไม่สามารถมี . ในคำถามได้",
+              confirmButtonText: "ตกลง",
+            });
+            return;
+          }
+        }
+
+        this.isLoading = true;
+
+        const { answer, a, a1, b, b1, c, c1, d, d1 } = this.questionForm;
+        if (answer === "a") {
+          a
+            ? (this.questionForm.answer = a)
+            : (this.questionForm.answer = a1.name);
+        }
+        if (answer === "b") {
+          b
+            ? (this.questionForm.answer = b)
+            : (this.questionForm.answer = b1.name);
+        }
+        if (answer === "c") {
+          c
+            ? (this.questionForm.answer = c)
+            : (this.questionForm.answer = c1.name);
+        }
+        if (answer === "d") {
+          d
+            ? (this.questionForm.answer = d)
+            : (this.questionForm.answer = d1.name);
+        }
         this.isLoading = true;
         let formData = new FormData();
-
         for (const key in this.questionForm) {
           formData.append(key, this.questionForm[key]);
           console.log(this.questionForm[key]);
         }
-
         this.$http
           .post(`${process.env.VUE_APP_API_PATH}/quiz/addQuiz.php`, formData)
           .then((res) => {
@@ -416,6 +708,7 @@ export default {
               query: {
                 lessonId: this.questionForm.lessonId,
                 subjectId: this.$route.query.subjectId,
+                subjectName: this.$route.query.subjectName,
               },
             });
           })

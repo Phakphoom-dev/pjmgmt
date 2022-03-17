@@ -1,21 +1,21 @@
 <template>
-  <v-container style="height: 80vh">
-    <v-row class="fill-height" align-content="center" justify="center">
-      <v-col class="text-subtitle-1 text-center" cols="12"> Loading... </v-col>
-      <v-col cols="6">
+  <v-dialog v-model="isLoading" hide-overlay persistent width="300">
+    <v-card color="primary" dark>
+      <v-card-text>
+        กำลังบันทึกข้อมูล...
         <v-progress-linear
-          color="primary accent-4"
           indeterminate
-          rounded
-          height="6"
+          color="white"
+          class="mb-0"
         ></v-progress-linear>
-      </v-col>
-    </v-row>
-  </v-container>
+      </v-card-text>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script>
 export default {
   name: "Loading",
+  props: ["isLoading"],
 };
 </script>

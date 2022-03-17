@@ -8,6 +8,9 @@
             <v-col cols="12">
               <Slider></Slider>
             </v-col>
+            <v-col cols="12">
+              <HeadingTextForm></HeadingTextForm>
+            </v-col>
           </v-row>
         </v-card>
       </v-col>
@@ -17,12 +20,14 @@
 
 <script>
 import Slider from "@/components/Settings/Slider";
+import HeadingTextForm from "@/components/Settings/HeadingTextForm";
 import "@/mixins/generalMixin";
 
 export default {
   name: "SuperSettingsIndex",
   components: {
     Slider,
+    HeadingTextForm,
   },
   data: () => ({
     slides: [],

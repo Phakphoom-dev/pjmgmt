@@ -13,6 +13,29 @@
                 <v-col cols="12">
                   <validation-provider
                     v-slot="{ errors }"
+                    name="ชื่อหลักสูตรหลัก"
+                    rules="required"
+                  >
+                    <v-select
+                      dense
+                      prepend-icon="mdi-book-open"
+                      :items="coursesName"
+                      item-value="courseId"
+                      item-text="courseName"
+                      v-model="subjectForm.courseId"
+                      :error-messages="errors"
+                      label="ชื่อหลักสูตรหลัก"
+                      @change="filterCourse(subjectForm.courseId)"
+                      outlined
+                    ></v-select>
+                  </validation-provider>
+                </v-col>
+              </v-row>
+
+              <v-row no-gutters>
+                <v-col cols="12">
+                  <validation-provider
+                    v-slot="{ errors }"
                     name="ชื่อหลักสูตร"
                     rules="required"
                   >
@@ -73,6 +96,116 @@
                 </v-col>
               </v-row>
 
+              <v-row no-gutters>
+                <v-col cols="6">
+                  <validation-provider
+                    v-slot="{ errors }"
+                    name="วันที่เริ่มต้น"
+                    rules="required"
+                  >
+                    <v-menu
+                      ref="dateStartMenu"
+                      v-model="dateStartMenu"
+                      :close-on-content-click="false"
+                      :return-value.sync="subjectForm.dates[0]"
+                      transition="scale-transition"
+                      offset-y
+                      min-width="auto"
+                    >
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-text-field
+                          dense
+                          outlined
+                          :error-messages="errors"
+                          v-model="subjectForm.dates[0]"
+                          label="วันที่เริ่มต้น"
+                          prepend-icon="mdi-calendar"
+                          readonly
+                          v-bind="attrs"
+                          v-on="on"
+                        ></v-text-field>
+                      </template>
+                      <v-date-picker
+                        v-model="subjectForm.dates[0]"
+                        no-title
+                        scrollable
+                      >
+                        <v-spacer></v-spacer>
+                        <v-btn
+                          text
+                          color="primary"
+                          @click="dateStartMenu = false"
+                        >
+                          Cancel
+                        </v-btn>
+                        <v-btn
+                          text
+                          color="primary"
+                          @click="
+                            $refs.dateStartMenu.save(subjectForm.dates[0])
+                          "
+                        >
+                          OK
+                        </v-btn>
+                      </v-date-picker>
+                    </v-menu>
+                  </validation-provider>
+                </v-col>
+                <v-col cols="6">
+                  <validation-provider
+                    v-slot="{ errors }"
+                    name="วันที่สิ้นสุด"
+                    rules="required"
+                  >
+                    <v-menu
+                      ref="dateEndMenu"
+                      v-model="dateEndMenu"
+                      :close-on-content-click="false"
+                      :return-value.sync="subjectForm.dates[1]"
+                      transition="scale-transition"
+                      offset-y
+                      min-width="auto"
+                    >
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-text-field
+                          class="ml-2"
+                          dense
+                          outlined
+                          :error-messages="errors"
+                          v-model="subjectForm.dates[1]"
+                          label="วันที่สิ้นสุด"
+                          prepend-icon="mdi-calendar"
+                          readonly
+                          v-bind="attrs"
+                          v-on="on"
+                        ></v-text-field>
+                      </template>
+                      <v-date-picker
+                        v-model="subjectForm.dates[1]"
+                        no-title
+                        scrollable
+                      >
+                        <v-spacer></v-spacer>
+                        <v-btn
+                          text
+                          color="primary"
+                          @click="dateEndMenu = false"
+                        >
+                          Cancel
+                        </v-btn>
+                        <v-btn
+                          text
+                          color="primary"
+                          @click="$refs.dateEndMenu.save(subjectForm.dates[1])"
+                        >
+                          OK
+                        </v-btn>
+                      </v-date-picker>
+                    </v-menu>
+                  </validation-provider>
+                </v-col>
+              </v-row>
+
               <v-row>
                 <v-btn class="mr-4" type="submit" block color="primary">
                   ยืนยัน
@@ -110,14 +243,19 @@ export default {
     ValidationObserver,
   },
   data: () => ({
+    coursesName: [],
+    dateStartMenu: false,
+    dateEndMenu: false,
     items: ["foo", "bar", "fizz", "buzz"],
     values: ["foo", "bar"],
     value: null,
     valid: true,
     subjectForm: {
+      courseId: "",
       stdId: "",
       subjectId: "",
       objective: "",
+      dates: [],
     },
     objectives: [
       "เพื่อไปทำงานในประเทศญี่ปุ่น",
@@ -130,8 +268,25 @@ export default {
     students: [],
   }),
   methods: {
+    async filterCourse(courseId) {
+      this.subjectName = await this.get("/subject/getAllSubject.php");
+
+      this.subjectName = await this.subjectName.filter(
+        (subject) => subject.courseId === courseId
+      );
+    },
     submit() {
       this.isLoading = true;
+      if (!this.subjectForm.dates[0] || !this.subjectForm.dates[1]) {
+        this.$swal({
+          icon: "warning",
+          text: "กรุณาระบุวันที่เริ่มต้นและสินสุด",
+          confirmButtonText: "ตกลง",
+          allowOutSideClick: false,
+        });
+        return;
+      }
+
       this.$refs.observer.validate().then((result) => {
         if (result) {
           let formData = new FormData();
@@ -147,6 +302,7 @@ export default {
               formData
             )
             .then((res) => {
+              console.log(res.data);
               if (res.status === 200) {
                 console.log("res", res.data);
                 this.isLoading = false;
@@ -169,12 +325,13 @@ export default {
     },
     chooseStd() {
       this.students = this.students.filter(
-        (student) => student.stdId === this.$route.params.stdId
+        (student) => student.stdId === parseInt(this.$route.query.stdId)
       );
-      this.subjectForm.stdId = this.$route.params.stdId;
+      this.subjectForm.stdId = parseInt(this.$route.query.stdId);
     },
   },
   async created() {
+    this.coursesName = await this.get("/course/getAllCourse.php");
     this.subjectName = await this.get("/subject/getAllSubject.php");
     this.students = await this.get("/student/getAllStudent.php");
     this.subjectName = this.subjectName.filter(
@@ -183,7 +340,7 @@ export default {
 
     this.students = this.students.filter((student) => student.status !== 0);
 
-    if (this.$route.params.stdId) {
+    if (this.$route.query.stdId) {
       this.chooseStd();
     }
   },

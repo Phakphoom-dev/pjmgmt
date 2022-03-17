@@ -1,7 +1,7 @@
 <template>
   <v-container fluid class="mt-3">
     <v-row class="mt-2" no-gutters>
-      <h3>บทเรียน</h3>
+      <h3>บทเรียน - {{ $route.query.subjectName }}</h3>
     </v-row>
 
     <!-- <v-row>
@@ -16,7 +16,13 @@
 
     <v-row class="mt-3">
       <v-col>
+        <v-btn color="info" @click="$router.go(-1)" class="mr-2"
+          ><v-icon small class="mr-1 mb-2">mdi-arrow-left</v-icon>
+          ย้อนกลับ</v-btn
+        >
+
         <v-data-table
+          :loading="isLoading"
           :headers="headers"
           :items="lessons"
           sort-by="username"
@@ -35,12 +41,7 @@
                 hide-details
               ></v-text-field>
               <v-spacer></v-spacer>
-              <v-btn
-                color="primary"
-                dark
-                class="mb-2"
-                @click="$router.push('addlesson')"
-              >
+              <v-btn color="primary" dark class="mb-2" @click="toAddLesson">
                 เพิ่มบทเรียน
               </v-btn>
             </v-toolbar>
@@ -78,7 +79,7 @@
               mdi-delete
             </v-icon>
           </template>
-          <template v-slot:no-data> ไม่พบผู้สอน </template>
+          <template v-slot:no-data> ไม่พบบทเรียน </template>
         </v-data-table>
       </v-col>
     </v-row>
@@ -90,6 +91,7 @@ import "@/mixins/generalMixin";
 export default {
   name: "ShowLessons",
   data: () => ({
+    isLoading: false,
     search: "",
     dialog: false,
     dialogDelete: false,
@@ -149,6 +151,7 @@ export default {
             const jsonData = JSON.stringify({
               lessonId: lesson.lessonId,
               lessonImage: lesson.lessonImage,
+              subjectId: lesson.subjectId,
             });
 
             this.$http
@@ -175,6 +178,13 @@ export default {
             return;
           }
         });
+    },
+
+    toAddLesson() {
+      this.$router.push({
+        name: "AddLesson",
+        query: { subjectId: this.$route.query.subjectId },
+      });
     },
 
     editLesson(lesson) {
@@ -223,13 +233,24 @@ export default {
       this.close();
     },
 
-    async getAllLesson() {
-      this.lessons = await this.get("/lesson/getAllLesson.php");
+    getAllLesson() {
+      this.$http
+        .post(`${process.env.VUE_APP_API_PATH}/lesson/getAllLesson.php`)
+        .then((res) => {
+          this.lessons = res.data.filter((lesson) => {
+            return lesson.subjectId == this.$route.query.subjectId;
+          });
+          console.log("lessons", this.lessons);
+        })
+        .catch((err) => {
+          console.log(err);
+          this.isLoading = false;
+        });
     },
   },
 
   async created() {
-    this.getAllLesson();
+    await this.getAllLesson();
   },
 };
 </script>

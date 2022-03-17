@@ -11,7 +11,7 @@
       </template>
     </v-btn>
 
-    <v-toolbar-title>Sakura Course</v-toolbar-title>
+    <v-toolbar-title>{{ title }}</v-toolbar-title>
     <v-spacer></v-spacer>
 
     <!-- <v-menu offset-y bottom nudge-bottom="10" left>
@@ -154,6 +154,7 @@ import { mapActions, mapState } from "vuex";
 export default {
   name: "Header",
   data: () => ({
+    title: "",
     userData: JSON.parse(localStorage.getItem("userData")),
     searchCollapse: true,
     notifications: [
@@ -231,7 +232,19 @@ export default {
       window.localStorage.setItem("isLogin", false);
       this.$router.push("/login");
     },
+    mounted() {},
   },
-  created() {},
+  created() {
+    this.$http
+      .get(`${process.env.VUE_APP_API_PATH}/manage/getTitle.php`)
+      .then((res) => {
+        this.title = res.data[0].title;
+        this.isLoading = false;
+      })
+      .catch((err) => {
+        this.isLoading = false;
+        console.log(err);
+      });
+  },
 };
 </script>

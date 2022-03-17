@@ -2,34 +2,27 @@
   <v-container fluid class="mt-3">
     <h3>Dashboard</h3>
     <v-row class="mt-3">
-      <v-col xs="12" sm="6" lg="3">
-        <dashboard-card
+      <v-col xs="12" sm="6" lg="4">
+        <DashboardCard
           title="ผู้เรียนทั้งหมด"
-          info="10 คน"
+          :info="`${students.length} คน`"
           icon="mdi-account-arrow-right"
-        ></dashboard-card>
+        ></DashboardCard>
       </v-col>
-      <v-col xs="12" sm="6" lg="3">
-        <dashboard-card
+      <v-col xs="12" sm="6" lg="4">
+        <DashboardCard
           title="ผู้เรียนที่กำลังศึกษา"
-          info="3 คน"
+          :info="`${stdStudying} คน`"
           icon="mdi-account-clock"
-        ></dashboard-card>
+        ></DashboardCard>
       </v-col>
-      <v-col xs="12" sm="6" lg="3">
-        <dashboard-card
+      <v-col xs="12" sm="6" lg="4">
+        <DashboardCard
           title="ผู้เรียนที่ผ่านการทดสอบ"
-          info="7 คน"
+          :info="`${stdFinish} คน`"
           icon="mdi-book-open-blank-variant"
-        ></dashboard-card>
+        ></DashboardCard>
       </v-col>
-      <!-- <v-col xs="12" sm="6" lg="3">
-        <dashboard-card
-          title="นักเรียนทั้งหมด"
-          info="30 คน"
-          icon="mdi-account-group"
-        ></dashboard-card>
-      </v-col> -->
     </v-row>
 
     <v-row class="mt-3">
@@ -46,22 +39,15 @@
                     <th class="text-left">ลำดับ</th>
                     <th class="text-left">ชื่อ-สกุล</th>
                     <th class="text-left">วัน-เวลาที่สมัคร</th>
-                    <th class="text-left">หลักสูตร</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(user, index) in users" :key="user.name">
+                  <tr v-for="(student, index) in students" :key="student.stdId">
                     <td>{{ index + 1 }}</td>
-                    <td>{{ user.fullname }}</td>
-                    <td>{{ user.datetime }}</td>
-                    <td>{{ user.subject }}</td>
-                    <td
-                      :class="
-                          user.status === 'กำลังศึกษา'
-                            ? 'info--text'
-                            : 'warning--text',
-                        "
-                    ></td>
+                    <td>{{ student.fullName }}</td>
+                    <td>
+                      {{ student.regisDate | moment("dddd, Do MMMM YYYY") }}
+                    </td>
                   </tr>
                 </tbody>
               </template>
@@ -76,21 +62,27 @@
                   <tr>
                     <th class="text-left">ลำดับ</th>
                     <th class="text-left">ชื่อหลักสูตร</th>
-                    <th class="text-left">จำนวนผู้สมัครทั้งหมด</th>
-                    <th class="text-left">ผู้เรียนที่กำลังศึกษา</th>
-                    <th class="text-left">ผู้เรียนที่ผ่านการทดสอบ</th>
+                    <th class="text-left">ชื่อผู้ลงทะเบียน</th>
+                    <th class="text-left">เวลาที่ลงทะเบียน</th>
+                    <th class="text-left">สถานะการเรียน</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr
-                    v-for="(subject, index) in students"
-                    :key="subject.subjectName"
-                  >
+                  <tr v-for="(subject, index) in subjects" :key="index">
                     <td>{{ index + 1 }}</td>
                     <td>{{ subject.subjectName }}</td>
-                    <td>{{ subject.totalStd }}</td>
-                    <td class="warning--text">{{ subject.learningStd }}</td>
-                    <td class="success--text">{{ subject.finished }}</td>
+                    <td>{{ subject.fullName }}</td>
+                    <td>
+                      {{ subject.regisDate | moment("dddd, Do MMMM YYYY") }}
+                    </td>
+                    <td>
+                      <v-chip
+                        v-if="subject.subjectProgress === 100"
+                        color="primary"
+                        >ผ่านการทดสอบ</v-chip
+                      >
+                      <v-chip v-else color="warning">กำลังศึกษา</v-chip>
+                    </td>
                   </tr>
                 </tbody>
               </template>
@@ -103,6 +95,7 @@
 </template>
 
 <script>
+import "@/mixins/generalMixin";
 import { users } from "./mockUser";
 import { students } from "./mockSubject";
 import DashboardCard from "@/components/Card/DashboardCard";
@@ -128,9 +121,40 @@ export default {
           artist: "Ellie Goulding",
         },
       ],
+      students: [],
+      stdStudying: 0,
+      stdFinish: 0,
+      subjects: [],
       users,
-      students,
     };
+  },
+  methods: {
+    async getAllStudent() {
+      this.students = await this.get(`/student/getAllStudent.php`);
+      this.students.sort(function (a, b) {
+        return (
+          new Date(b.regisDate.replace(/\s/, "T") + "Z") -
+          new Date(a.regisDate.replace(/\s/, "T") + "Z")
+        );
+      });
+      console.log("students", this.students);
+    },
+    async getAllStudentSubject() {
+      const datas = await this.get(`/student/getAllStudentSubject.php`);
+      this.subjects = datas;
+
+      datas.map((data) => {
+        if (data.subjectProgress < 100) {
+          this.stdStudying++;
+        } else {
+          this.stdFinish++;
+        }
+      });
+    },
+  },
+  async created() {
+    await this.getAllStudent();
+    await this.getAllStudentSubject();
   },
 };
 </script>

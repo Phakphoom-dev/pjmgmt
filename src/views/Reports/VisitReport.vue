@@ -91,7 +91,10 @@
           </template>
 
           <template v-slot:item.registeredDate="{}">
-            {{ new Date() | moment("DD/MM/YYYY HH:mm:ss") }}
+            {{
+              new Date()
+                | moment("DD/MM/YYYY HH:mm:ss".replace(/\s/, "T") + "Z")
+            }}
           </template>
 
           <template v-slot:item.active="{ item }">
@@ -106,11 +109,21 @@
           </template>
 
           <template v-slot:item.visitTime="{}">
-            {{ new Date() | moment("DD/MM/YYYY HH:mm:ss") }}
+            {{
+              new Date()
+                | moment("DD/MM/YYYY HH:mm:ss".replace(/\s/, "T") + "Z")
+            }}
           </template>
 
           <template v-slot:item.logoutTime="{}">
-            {{ new Date() | moment("add", "1 days", "DD/MM/YYYY HH:mm:ss") }}
+            {{
+              new Date()
+                | moment(
+                  "add",
+                  "1 days",
+                  "DD/MM/YYYY HH:mm:ss".replace(/\s/, "T") + "Z"
+                )
+            }}
           </template>
 
           <template slot="body.append">

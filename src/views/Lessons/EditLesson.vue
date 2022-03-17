@@ -4,7 +4,7 @@
       ><v-icon small class="mr-1">mdi-arrow-left</v-icon> ย้อนกลับ</v-btn
     >
     <v-card class="mt-3">
-      <v-card-title>เพิ่มบทเรียน</v-card-title>
+      <v-card-title>แก้ไขบทเรียน</v-card-title>
       <v-card-text>
         <validation-observer ref="observer">
           <v-form @submit.prevent="submit">

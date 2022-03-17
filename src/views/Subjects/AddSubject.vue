@@ -3,7 +3,7 @@
     <v-btn color="info" @click="$router.go(-1)" class="mr-2"
       ><v-icon small class="mr-1">mdi-arrow-left</v-icon> ย้อนกลับ</v-btn
     >
-    <v-card class="mt-3">
+    <v-card class="mt-3" :loading="isLoading">
       <v-card-title>เพิ่มหลักสูตร</v-card-title>
       <v-card-text>
         <validation-observer ref="observer">
@@ -145,23 +145,21 @@
 
               <v-row no-gutters>
                 <v-col cols="12">
-                  <v-col cols="12">
-                    <validation-provider
-                      v-slot="{ errors }"
-                      name="รูปหลักสูตร"
-                      rules="required"
-                    >
-                      <v-file-input
-                        :error-messages="errors"
-                        @change="onFileChange"
-                        accept="image/*"
-                        label="รูปหลักสูตร"
-                        v-model="subjectForm.subjectImg"
-                        dense
-                        outlined
-                      ></v-file-input>
-                    </validation-provider>
-                  </v-col>
+                  <validation-provider
+                    v-slot="{ errors }"
+                    name="รูปหลักสูตร"
+                    rules="required"
+                  >
+                    <v-file-input
+                      :error-messages="errors"
+                      @change="onFileChange"
+                      accept="image/*"
+                      label="รูปหลักสูตร"
+                      v-model="subjectForm.subjectImg"
+                      dense
+                      outlined
+                    ></v-file-input>
+                  </validation-provider>
                 </v-col>
               </v-row>
 
@@ -279,11 +277,11 @@ export default {
         this.url = null;
       }
     },
-
     submit() {
-      this.isLoading = true;
       this.$refs.observer.validate().then((result) => {
         if (result) {
+          this.isLoading = true;
+
           let formData = new FormData();
 
           for (const key in this.subjectForm) {

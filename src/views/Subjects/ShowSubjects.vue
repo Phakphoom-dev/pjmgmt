@@ -1,7 +1,7 @@
 <template>
   <v-container fluid class="mt-3">
     <v-row class="mt-2" no-gutters>
-      <h3>รายวิชา</h3>
+      <h3>หลักสูตร</h3>
     </v-row>
 
     <!-- <v-row>
@@ -17,6 +17,7 @@
     <v-row class="mt-3">
       <v-col>
         <v-data-table
+          :loading="isLoading"
           :headers="headers"
           :items="subjects"
           sort-by="username"
@@ -35,14 +36,14 @@
                 hide-details
               ></v-text-field>
               <v-spacer></v-spacer>
-              <v-btn
+              <!-- <v-btn
                 color="success"
                 dark
                 class="mr-3 mb-2"
                 :to="{ name: 'RegisterSubject' }"
               >
                 ลงทะเบียน
-              </v-btn>
+              </v-btn> -->
               <v-btn color="primary" dark class="mb-2" to="addsubject">
                 เพิ่มหลักสูตร
               </v-btn>
@@ -115,6 +116,7 @@ import "@/mixins/generalMixin";
 export default {
   name: "ShowSubjects",
   data: () => ({
+    isLoading: false,
     search: "",
     dialogm1: "",
     dialog: false,
@@ -143,6 +145,14 @@ export default {
 
   methods: {
     deleteSubject(item) {
+      if (item.lessonAmount > 0) {
+        this.$toast.open({
+          message: "ไม่สามารถลบได้เนื่องจากมีหลักสูตรในการใช้งาน",
+          type: "error",
+        });
+        return;
+      }
+
       this.$swal
         .fire({
           title: `ต้องการลบ ${item.subjectName} หรือไม่`,
@@ -235,6 +245,11 @@ export default {
           this.teachers = res.data;
         })
         .catch((err) => {
+          this.$swal.fire({
+            icon: "warning",
+            title: "ไม่พบข้อมูลผู้สอน",
+            confirmButtonText: "ตกลง",
+          });
           this.isLoading = false;
           console.log(err);
         });

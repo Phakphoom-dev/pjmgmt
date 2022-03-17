@@ -4,6 +4,7 @@
     <v-row class="mt-3">
       <v-col>
         <v-data-table
+          :loading="isLoading"
           :headers="headers"
           :items="videoList"
           sort-by="username"
@@ -79,7 +80,7 @@
           </template>
 
           <template v-slot:item.uploadDate="{ item }">
-            {{ toThaiDateString(new Date(item.uploadDate)) }}
+            {{ item.uploadDate | moment("dddd, Do MMMM YYYY HH:mm:ss") }}
           </template>
 
           <template v-slot:item.actions="{ item }">
@@ -156,6 +157,7 @@ import "@/mixins/generalMixin";
 export default {
   name: "ShowTeachers",
   data: () => ({
+    isLoading: false,
     search: "",
     uploadPercentage: 0,
     selectedFiles: [],
@@ -338,7 +340,26 @@ export default {
     },
 
     async getVideoList() {
+      this.isLoading = true;
       this.videoList = await this.get("/lesson/getAllVideo.php");
+      let fileSize = 0;
+      let newSize = 0;
+      console.log();
+      this.videoList.map((video) => {
+        if (this.$moment(video.uploadDate) > this.$moment("2022-02-05")) {
+          newSize += video.fileSize;
+        }
+      });
+
+      this.videoList.map((video) => {
+        if (this.$moment(video.uploadDate) < this.$moment("2022-02-05")) {
+          fileSize += video.fileSize;
+        }
+      });
+
+      console.log("fileSize", fileSize);
+      console.log("newSize", newSize);
+      this.isLoading = false;
     },
   },
   created() {

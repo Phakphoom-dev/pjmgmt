@@ -4,6 +4,7 @@
     <v-row class="mt-3">
       <v-col>
         <v-data-table
+          :loading="isLoading"
           :headers="headers"
           :items="admins"
           sort-by="username"
@@ -114,9 +115,11 @@ export default {
     },
 
     getAllAdmin() {
+      this.isLoading = true;
       this.$http
         .get(`${process.env.VUE_APP_API_PATH}/user/getAllAdmin.php`)
         .then((res) => {
+          this.isLoading = false;
           this.admins = res.data;
           this.admins = this.admins.filter(
             (admin) => admin.role !== "superAdmin"
