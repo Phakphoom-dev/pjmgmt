@@ -4,7 +4,12 @@
       <v-row>
         <v-col cols="7" class="main-part d-none d-md-none d-lg-flex">
           <div class="d-flex">
-            <v-img src="@/assets/logo.svg" contain></v-img>
+            <v-img
+              max-height="150"
+              max-width="250"
+              src="@/assets/Logo-feu.png"
+              contain
+            ></v-img>
             <p>{{ title }}</p>
           </div>
         </v-col>
@@ -22,7 +27,7 @@
               <div class="login-wrapper pt-md-4 pt-0">
                 <v-tabs grow>
                   <v-tabs-slider></v-tabs-slider>
-                  <v-tab :href="`#tab-login`"> LOGIN </v-tab>
+                  <v-tab :href="`#tab-login`"> เข้าสู่ระบบ </v-tab>
 
                   <v-tab-item :value="'tab-login'">
                     <v-form>
@@ -46,30 +51,13 @@
                               ></v-text-field>
                             </v-col>
                             <v-col class="d-flex justify-space-between">
-                              <v-btn
-                                class="text-capitalize"
-                                large
-                                :disabled="
+                              <SubmitButton
+                                :isDisabled="
                                   password.length === 0 || username.length === 0
                                 "
-                                color="primary"
-                                @click="login"
-                                block
-                              >
-                                <v-progress-circular
-                                  v-if="isLoading"
-                                  indeterminate
-                                  color="white"
-                                  :width="5"
-                                ></v-progress-circular>
-                                <span v-else>Login</span>
-                              </v-btn>
-                              <!-- <v-btn
-                                large
-                                text
-                                class="text-capitalize primary--text"
-                                >Forget Password</v-btn
-                              > -->
+                                :isLoading="isLoading"
+                                @submit="login"
+                              />
                             </v-col>
                           </v-form>
                         </v-row>
@@ -82,9 +70,11 @@
             <v-col cols="12" class="d-flex justify-center">
               <v-footer>
                 <div class="primary--text">
-                  © 2014-2020
-                  <a href="https://flatlogic.com/" class="text-decoration-none"
-                    >Flatlogic</a
+                  © 2022
+                  <a
+                    href="https://www.facebook.com/JustmeArtyy/"
+                    class="text-decoration-none"
+                    >Phakphoom Khumpuan</a
                   >, LLC. All rights reserved.
                 </div>
               </v-footer>
@@ -97,15 +87,21 @@
 </template>
 
 <script>
+import SubmitButton from "@/components/Button/SubmitButton";
+import userAPI from "../../api/user";
+
 export default {
   name: "Login",
+  components: {
+    SubmitButton,
+  },
   data() {
     return {
-      title: "",
+      title: "ระบบบริหารจัดการโครงงาน มหาวิทยาลัยฟาร์อีสเทอร์น",
       isLoading: false,
-      username: "",
+      username: "superadmin",
+      password: "super5678",
       usernameRules: [(v) => !!v || "Username is required"],
-      password: "",
       passRules: [(v) => !!v || "Password is required"],
     };
   },
@@ -115,48 +111,49 @@ export default {
       let formData = new FormData();
       formData.append("username", this.username);
       formData.append("password", this.password);
-      this.$http
-        .post(`${process.env.VUE_APP_API_PATH}/authen/adminLogin.php`, formData)
+
+      userAPI
+        .login(formData)
         .then((res) => {
           this.isLoading = false;
-          localStorage.setItem("userData", JSON.stringify(res.data[0]));
-          localStorage.setItem("isLogin", true);
+          if (res.status === 200) {
+            const user = res.data.user.user[0];
+            localStorage.setItem(
+              "userData",
+              JSON.stringify(res.data.user.user[0])
+            );
 
-          if (res.data[0].role === "teacher") {
-            this.$router.push("/lessons/subject-lesson");
-          } else {
-            this.$router.push("/");
+            this.$toast.open({
+              type: "success",
+              message: res.data.message,
+            });
+
+            if (user.roleId === 1) {
+              this.$router.push("/dashboard");
+            }
+
+            if (user.roleId === 2) {
+              this.$router.push("/file-manage");
+            }
+
+            if (user.roleId === 3) {
+              this.$router.push("/student-manage");
+            }
           }
         })
         .catch((err) => {
           this.isLoading = false;
           localStorage.setItem("userData", null);
-          localStorage.setItem("isLogin", false);
-          this.$swal({
-            icon: "error",
-            text: err.response.data.message,
-            confirmButtonText: "ตกลง",
-            allowOutSideClick: false,
-          });
-          return;
-        });
-    },
-    getTitle() {
-      this.$http
-        .get(`${process.env.VUE_APP_API_PATH}/manage/getTitle.php`)
-        .then((res) => {
-          this.title = res.data[0].title;
-          this.isLoading = false;
-        })
-        .catch((err) => {
-          this.isLoading = false;
-          console.log(err);
+          if (err.response.data.status === 500) {
+            this.$toast.open({
+              type: "error",
+              message: err.response.data.message,
+            });
+          }
         });
     },
   },
-  created() {
-    this.getTitle();
-  },
+  created() {},
 };
 </script>
 

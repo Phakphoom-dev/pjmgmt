@@ -18,7 +18,11 @@ import vueDebounce from "vue-debounce";
 import "quill/dist/quill.core.css";
 import "quill/dist/quill.snow.css";
 import "quill/dist/quill.bubble.css";
+import VueChatScroll from "vue-chat-scroll";
+import VueApexCharts from "vue-apexcharts";
 
+Vue.use(VueApexCharts);
+Vue.use(VueChatScroll);
 Vue.use(VueQuillEditor /* { default global options } */);
 Vue.use(vueDebounce);
 
@@ -26,12 +30,15 @@ Vue.use(vueDebounce, {
   listenTo: ["input", "change"],
 });
 
+Vue.component("apexchart", VueApexCharts);
+
 moment.tz.setDefault("Asia/Jakarta");
 moment.locale("th");
 
 Vue.use(VueToast, {
-  position: "top-right",
+  position: "top",
 });
+
 Vue.use(CKEditor);
 Vue.use(VueSweetalert2);
 Vue.prototype.$http = Axios;
@@ -41,19 +48,20 @@ Vue.use(VueMoment, {
 });
 
 router.beforeEach((to, from, next) => {
-  if (to.path !== "/login") {
-    const isLogin = JSON.parse(localStorage.getItem("isLogin"));
+  let path = to.path;
 
-    if (!isLogin) {
-      next("login");
+  if (path === "/index" || path === "/collection" || path === "/view-collection") {
+    next();
+  } else {
+    if (to.path !== "/login") {
+      const userData = JSON.parse(localStorage.getItem("userData"));
+
+      if (!userData) {
+        next("login");
+      }
     }
   }
 
-  // if (to.path === "/dashboard") {
-  //   user ? next() : next({ path: "/login" });
-  // }
-
-  // next();
   next();
 });
 

@@ -1,8 +1,8 @@
 <template>
-  <v-dialog v-model="isLoading" hide-overlay persistent width="300">
+  <v-dialog v-model="isLoading" hide-overlay persistent width="500">
     <v-card color="primary" dark>
       <v-card-text>
-        กำลังบันทึกข้อมูล...
+        {{ title }}
         <v-progress-linear
           indeterminate
           color="white"
@@ -16,6 +16,14 @@
 <script>
 export default {
   name: "Loading",
-  props: ["isLoading"],
+  props: {
+    isLoading: {
+      default: false,
+      type: Boolean,
+    },
+    title: {
+      type: String,
+    },
+  },
 };
 </script>
