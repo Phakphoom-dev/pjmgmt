@@ -149,7 +149,7 @@ export default {
         {
           icon: "mdi-folder-image",
           title: "ค้นหาโครงงาน",
-          to: "/collection",
+          to: "/",
         },
         // {
         //   icon: "mdi-account",

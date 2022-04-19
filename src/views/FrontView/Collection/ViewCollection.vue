@@ -1,5 +1,6 @@
 <template>
   <v-container fluid>
+    <Overlay :isLoading="isLoading" />
     <section id="home">
       <v-row justify="center">
         <v-col cols="12">
@@ -107,8 +108,10 @@
                           </v-expansion-panel>
                         </v-expansion-panels>
                       </v-col>
-                      <v-col cols="6" v-else>
-                        <h1>ยังไม่มีไฟล์เอกสารที่เผยแพร่</h1>
+                      <v-col cols="12" v-else>
+                        <v-alert border="right" color="blue-grey" dark>
+                          ยังไม่มีไฟล์เอกสารที่เผยแพร่
+                        </v-alert>
                       </v-col>
                     </v-row>
                   </td>
@@ -129,13 +132,16 @@ import fileAPI from "@/api/file";
 
 export default {
   name: "ViewCollection",
-  components: {},
+  components: {
+    Overlay: () => import("@/components/Overlay"),
+  },
   data() {
     return {
       panel: [],
       author: {},
       files: [],
       userData: JSON.parse(localStorage.getItem("userData")),
+      isLoading: false,
       folders: [],
     };
   },
@@ -159,9 +165,11 @@ export default {
       //   });
     },
     getProject() {
+      this.isLoading = true;
       frontAPI
         .getProject({ stdId: this.$route.query.stdId })
         .then((res) => {
+          this.isLoading = false;
           console.log(res);
           this.author = res.data.stdFolder[0];
           console.log("author", this.author);
@@ -181,6 +189,7 @@ export default {
           });
         })
         .catch((err) => {
+          this.isLoading = false;
           console.log(err);
         });
     },

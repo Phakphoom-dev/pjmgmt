@@ -50,7 +50,7 @@ Vue.use(VueMoment, {
 router.beforeEach((to, from, next) => {
   let path = to.path;
 
-  if (path === "/index" || path === "/collection" || path === "/view-collection") {
+  if (path === "/index" || path === "/" || path === "/view-collection") {
     next();
   } else {
     if (to.path !== "/login") {

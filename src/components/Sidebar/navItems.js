@@ -29,7 +29,7 @@ export const adminNav = [
 
 export const userNav = [
   { title: "จัดการโครงงาน", icon: "mdi-file-document", link: "/file-manage" },
-  { title: "ค้นหาโครงงาน", icon: "mdi-magnify", link: "/collection" },
+  { title: "ค้นหาโครงงาน", icon: "mdi-magnify", link: "/" },
   { title: "จัดการรูปภาพหน้าปก", icon: "mdi-cast-education", link: "/cover-manage" },
 ];
 
@@ -37,5 +37,5 @@ export const teacherNav = [
   { title: "หน้าหลัก", icon: "mdi-home", link: "/dashboard" },
   { title: "จัดการโครงงานนักศึกษา", icon: "mdi-file-document", link: "/student-manage" },
   { title: "จัดการสถานะการเผยแพร่", icon: "mdi-printer-settings", link: "/publish-manage" },
-  { title: "ค้นหาโครงงาน", icon: "mdi-magnify", link: "/collection" },
+  { title: "ค้นหาโครงงาน", icon: "mdi-magnify", link: "/" },
 ];

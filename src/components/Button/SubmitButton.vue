@@ -1,5 +1,6 @@
 <template>
   <v-btn
+    type="submit"
     class="text-capitalize"
     large
     :disabled="isDisabled"
@@ -29,5 +30,7 @@ export default {
       type: Boolean,
     },
   },
+
+  methods: {},
 };
 </script>

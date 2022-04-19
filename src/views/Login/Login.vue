@@ -38,9 +38,9 @@
                               <v-text-field
                                 v-model="username"
                                 :rules="usernameRules"
-                                value="admin@flatlogic.com"
                                 label="Username"
                                 required
+                                @keyup.enter="enterSubmit"
                               ></v-text-field>
                               <v-text-field
                                 v-model="password"
@@ -99,8 +99,8 @@ export default {
     return {
       title: "ระบบบริหารจัดการโครงงาน มหาวิทยาลัยฟาร์อีสเทอร์น",
       isLoading: false,
-      username: "superadmin",
-      password: "super5678",
+      username: "",
+      password: "",
       usernameRules: [(v) => !!v || "Username is required"],
       passRules: [(v) => !!v || "Password is required"],
     };

@@ -257,7 +257,7 @@ const routes = [
   },
   // Front Route
   {
-    path: "/frontend",
+    path: "/",
     component: FrontLayout,
     children: [
       {
@@ -266,7 +266,7 @@ const routes = [
         component: Index,
       },
       {
-        path: "/collection",
+        path: "/",
         name: "Collection",
         component: Collection,
       },

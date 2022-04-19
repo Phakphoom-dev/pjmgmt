@@ -1,5 +1,6 @@
 <template>
   <v-container fluid class="mt-3">
+    <Overlay :isLoading="isLoading" />
     <h3>จัดการเอกสารโครงงาน - {{ stdName }}</h3>
     <!-- folderDialog -->
     <v-card max-width="800" class="mx-auto" v-if="folderDialog">
@@ -50,20 +51,21 @@
 </template>
 
 <script>
-import StatusChip from "./components/StatusChip.vue";
 import "@/mixins/generalMixin";
 import fileAPI from "@/api/file";
 
 export default {
   name: "FileManage",
   components: {
-    StatusChip,
+    StatusChip: () => import("./components/StatusChip"),
+    Overlay: () => import("@/components/Overlay"),
   },
   data() {
     return {
       folderDialog: false,
       userData: JSON.parse(localStorage.getItem("userData")),
       folders: [],
+      isLoading: false,
     };
   },
   computed: {
@@ -84,6 +86,7 @@ export default {
         params: { sFolderId: sFolderId, stdId: stdId, title: title },
       });
     },
+
     checkStdFolder() {
       this.isLoading = true;
       let formData = JSON.stringify(this.userData);
