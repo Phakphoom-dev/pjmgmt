@@ -68,6 +68,7 @@ export default {
       isLoading: false,
     };
   },
+
   computed: {
     stdName() {
       if (this.$route.query.studentName) {
@@ -77,6 +78,7 @@ export default {
       }
     },
   },
+
   methods: {
     openFolder(folder) {
       console.log(folder);
@@ -103,6 +105,7 @@ export default {
         });
     },
   },
+
   async created() {
     this.checkStdFolder();
     console.log(this.$route);

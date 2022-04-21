@@ -11,6 +11,10 @@ export default {
     return axios.get(`${url}/user/clearNotifications.php?userId=${userId}&roleId=${roleId}`);
   },
 
+  removeNotification(formData) {
+    return axios.post(`${url}/user/removeNotification.php`, formData);
+  },
+
   index(params) {
     return axios.get(`${url}/user/index.php`, {
       params: params,
@@ -19,6 +23,12 @@ export default {
 
   getStudents(params) {
     return axios.get(`${url}/user/getStudents.php`, {
+      params: params,
+    });
+  },
+
+  getPublishStudents(params) {
+    return axios.get(`${url}/user/getPublishStudents.php`, {
       params: params,
     });
   },

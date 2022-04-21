@@ -9,7 +9,10 @@
     <v-card-text class="pa-0">
       <v-list dense class="pa-0 notes_list">
         <template v-for="(item, index) in items">
-          <v-list-item :key="index" @click="handleClick">
+          <v-list-item
+            :key="index"
+            @click="goToChat(item.sFolderId, item.fs_name, item.sCommentId)"
+          >
             <v-list-item-avatar :color="item.color">
               <v-icon dark>{{ item.icon }}</v-icon>
             </v-list-item-avatar>
@@ -48,7 +51,7 @@ export default {
   },
 
   methods: {
-    ...mapActions("header", ["clearNotifications"]),
+    ...mapActions("header", ["clearNotifications", "removeNotification"]),
 
     clear() {
       const payload = {
@@ -59,8 +62,37 @@ export default {
       this.clearNotifications(payload);
     },
 
-    handleClick: (e) => {
-      console.log("click");
+    goToChat(sFolderId, fs_name, sCommentId) {
+      if (this.userData.roleId === 2) {
+        this.removeNotification(sCommentId);
+        this.$router.push({
+          name: "Chapter",
+          params: {
+            sFolderId: sFolderId,
+            stdId: this.userData.userId,
+            title: fs_name,
+            fromNotification: true,
+          },
+        });
+        console.log("True");
+      }
+
+      if (this.userData.roleId === 3) {
+        this.removeNotification(sCommentId);
+        this.$router.push({
+          name: "Chapter",
+          params: {
+            sFolderId: sFolderId,
+            stdId: this.userData.userId,
+            title: fs_name,
+            fromNotification: true,
+          },
+          query: {
+            roleId: this.userData.roleId,
+            teacherId: this.userData.userId,
+          },
+        });
+      }
     },
 
     handleClearNotification() {},

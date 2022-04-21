@@ -103,6 +103,7 @@ export default {
       isLoading: false,
       students: [],
       projectname: "",
+      userData: JSON.parse(localStorage.getItem("userData")),
     };
   },
   methods: {
@@ -153,7 +154,7 @@ export default {
     getStudents() {
       this.isLoading = true;
       userAPI
-        .getStudents({ role_id: 2 })
+        .getPublishStudents({ role_id: 2, teacherId: this.userData.userId })
         .then((res) => {
           this.isLoading = false;
           this.students = res.data.user;

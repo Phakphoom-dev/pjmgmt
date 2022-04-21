@@ -8,11 +8,15 @@ const state = {
 const mutations = {
   GET_NOTIFICATIONS(state, userMessages) {
     state.notifications = userMessages;
-    console.log(state.notifications);
   },
 
   CLEAR_NOTIFICATIONS(state) {
     state.notifications = [];
+  },
+
+  REMOVE_NOTIFICATION(state, sCommentId) {
+    let notifications = state.notifications;
+    state.notifications = notifications.filter((msg) => msg.sCommentId !== sCommentId);
   },
 };
 
@@ -25,6 +29,9 @@ const actions = {
       const msgTime = `${moment(msg.sCommentTimestamp).startOf(msg.sCommentTimestamp).fromNow()}`;
 
       return {
+        sCommentId: msg.sCommentId,
+        sFolderId: msg.sFolderId,
+        fs_name: msg.fs_name,
         title: msg.sCommentMessage,
         color: "red",
         icon: "mdi-email",
@@ -33,6 +40,14 @@ const actions = {
     });
 
     commit("GET_NOTIFICATIONS", userMessages);
+  },
+
+  async removeNotification({ commit }, sCommentId) {
+    let formData = new FormData();
+    formData.append("sCommentId", sCommentId);
+
+    userAPI.removeNotification(formData);
+    commit("REMOVE_NOTIFICATION", sCommentId);
   },
 
   async clearNotifications({ commit }, payload) {

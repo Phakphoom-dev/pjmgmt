@@ -9,7 +9,7 @@
         <v-toolbar-title>{{ $route.params.title }}</v-toolbar-title>
       </v-toolbar>
 
-      <v-tabs vertical>
+      <v-tabs vertical v-model="tabs">
         <v-tab>
           <v-icon left> mdi-file </v-icon>
           จัดการไฟล์
@@ -213,6 +213,7 @@ export default {
   components: { Loading, DeleteDialog, FileTab, FileLog },
   data() {
     return {
+      tabs: 0,
       chapterStatus: "",
       publish: "",
       message: "",
@@ -235,6 +236,26 @@ export default {
   },
 
   computed: {},
+
+  watch: {
+    "$route.params.sFolderId": function (sFolderId) {
+      if (this.userData.roleId === 2) {
+        this.sFolderId = this.$route.params.sFolderId;
+        this.stdId = this.$route.params.stdId;
+        this.tabs = 1;
+        this.getStdChapter();
+      }
+
+      if (this.userData.roleId === 3) {
+        this.sFolderId = this.$route.params.sFolderId;
+        this.stdId = this.$route.params.stdId;
+        this.teacherId = this.$route.query.teacherId;
+        this.roleId = this.$route.query.roleId;
+        this.tabs = 1;
+        this.getStdChapter();
+      }
+    },
+  },
 
   methods: {
     previewImage() {
@@ -428,6 +449,8 @@ export default {
     if (this.userData.roleId !== 3) {
       this.checkId();
     }
+    console.log("Chapter Created");
+    if (this.$route.params.fromNotification) this.tabs = 1;
     this.getStdChapter();
   },
 };
